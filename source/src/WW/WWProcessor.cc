@@ -1,6 +1,10 @@
 // -- your process header
 #include "WW/WWProcessor.h"
 
+// Custom headers
+#include <Utils/Collections.h>
+#include <Utils/MC.h>
+
 // -- lcio headers
 #include "EVENT/LCCollection.h"
 #include "EVENT/MCParticle.h"
@@ -56,14 +60,12 @@ void WWProcessor::processEvent(EVENT::LCEvent *event) {
   streamlog_out(DEBUG) << "Processing event no " << event->getEventNumber()
                        << " - run " << event->getEventNumber() << std::endl;
 
-  // Collect MC collection
-  EVENT::LCCollection *mc_collection{};
-  try {
-    mc_collection = event->getCollection(m_mcCollectionName);
-  } catch (EVENT::DataNotAvailableException &) {
-    streamlog_out(WARNING) << "MC collection '" << m_mcCollectionName
-                           << "' is not available !" << std::endl;
+  auto mc_particles =
+      Utils::Collections::read<EVENT::MCParticle>(event, m_mcCollectionName);
+  for (const auto mcp_ptr : mc_particles) {
+    auto tlv = Utils::MC::get_tlv(*mcp_ptr);
   }
+  
 }
 
 //------------------------------------------------------------------------------
