@@ -5,7 +5,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.6 FATAL_ERROR)
 ########################################################
 
 # project name
-PROJECT( %(repository)s )
+PROJECT( PrEWSampleProduction )
 
 # project version
 SET( ${PROJECT_NAME}_VERSION_MAJOR 1 )
@@ -23,11 +23,6 @@ INCLUDE_DIRECTORIES( SYSTEM ${Marlin_INCLUDE_DIRS} )
 LINK_LIBRARIES( ${Marlin_LIBRARIES} )
 ADD_DEFINITIONS( ${Marlin_DEFINITIONS} )
 
-FIND_PACKAGE( DD4hep )
-INCLUDE_DIRECTORIES( SYSTEM ${DD4hep_INCLUDE_DIRS} )
-LINK_LIBRARIES( ${DD4hep_LIBRARIES} )
-ADD_DEFINITIONS( ${DD4hep_DEFINITIONS} )
-
 FIND_PACKAGE( MarlinUtil 1.0 REQUIRED ) # minimum required MarlinUtil version
 INCLUDE_DIRECTORIES( SYSTEM ${MarlinUtil_INCLUDE_DIRS} )
 LINK_LIBRARIES( ${MarlinUtil_LIBRARIES} )
@@ -37,6 +32,18 @@ FIND_PACKAGE( ROOT REQUIRED )
 INCLUDE_DIRECTORIES( SYSTEM ${ROOT_INCLUDE_DIRS} )
 LINK_LIBRARIES( ${ROOT_LIBRARIES} )
 ADD_DEFINITIONS( ${ROOT_DEFINITIONS} )
+
+# Custom libraries
+find_library( 
+  MarlinHelp MarlinHelp 
+  HINTS 
+    /afs/desy.de/group/flc/pool/beyerjac/TGCAnalysis/SampleProduction/MarlinAnalysis/MarlinHelp/lib
+  REQUIRED 
+)
+get_filename_component(MarlinHelp_lib_dir ${MarlinHelp} DIRECTORY)
+include_directories(
+  ${MarlinHelp_lib_dir}/../source/MarlinHelp/include
+)
 
 # Compile you project
 ADD_SUBDIRECTORY( source )

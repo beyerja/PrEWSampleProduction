@@ -1,52 +1,25 @@
+## PrEWSampleProduction
 
-## %(repository)s
-
-%(description)s
+Marlin processor(s) to produce the input samples needed for a PrEW fit.
 
 ### Installation
 
-Explain here:
+This package needs `iLCSoft` and my own `MarlinHelp` library.
 
-- what are the package dependencies (iLCSoft, others ?)
-- how to compile your package. Should normally be something like:
-
+To intall it first set up the environment and add the processor to the Marlin path
 ```shell
-source /path/to/ilcsoft/init_ilcsoft.sh
-mkdir build
-cd build
-cmake -C $ILCSOFT/ILCSoft.cmake ..
-make install
+cd macros && source load_env.sh && source add_processors.sh && cd ..
+```
+
+Then the source code can be compiled using
+```shell
+cd macros && ./compile.sh && cd ..
 ```
 
 ### How to run the analysis
 
-Explain here:
-
-- where to find data needed for your analysis or how to produce them
-- how to run you analysis: 
-   - Marlin processors to run ?
-   - ROOT macros to run ?
-   - Shell scripts ?
-   - Run the analysis on grid if you provide scripts for that
-
-Example:
+Run the WW example using:
 
 ```shell
-export MARLIN_DLL=./lib/lib%(repository)s.so
-Marlin ./scripts/ExampleProcessor.xml
+Marlin ./scripts/WWProcessorTest.xml
 ```
-
-If you want to provide a lot of details on your analysis, use the doc/Readme.md and point to it from this Readme.md file:
-
-More documentation available here in [doc/Readme.md](doc/Readme.md) !
-
-### Issues and contact
-
-Explain here how can people reach you:
-
-- via the Github issue interface. For the skeleton package: https://github.com/ILDAnaSoft/%(repository)s/issues
-- **not mandatory**:
-    - email address
-    - working institute
-
-
