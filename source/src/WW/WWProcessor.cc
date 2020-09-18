@@ -7,7 +7,6 @@
 
 // -- lcio headers
 #include "EVENT/LCCollection.h"
-#include "EVENT/MCParticle.h"
 #include "UTIL/LCTOOLS.h"
 
 // This line allows to register your processor in marlin when calling "Marlin
@@ -43,6 +42,9 @@ WWProcessor::WWProcessor() : marlin::Processor("WWProcessor") {
 void WWProcessor::init() {
   // Usually a good idea to print parameters
   printParameters(); // method from marlin::Processor
+
+  // Set up the output tree
+  this->create_tree();
 }
 
 //------------------------------------------------------------------------------
@@ -60,16 +62,23 @@ void WWProcessor::processEvent(EVENT::LCEvent *event) {
   streamlog_out(DEBUG) << "Processing event no " << event->getEventNumber()
                        << " - run " << event->getEventNumber() << std::endl;
 
-  auto mc_particles =
+  // Read the header info
+  m_header.read(*event);
+
+  // Reset the observables
+  m_observables.reset();
+
+  // Read the observables
+  auto mcps =
       Utils::Collections::read<EVENT::MCParticle>(event, m_mcCollectionName);
   for (const auto mcp_ptr : mc_particles) {
     auto tlv = Utils::MC::get_tlv(*mcp_ptr);
   }
   
+  // Fill the event data into the tree
+  m_tree->Fill();
 }
 
 //------------------------------------------------------------------------------
 
-void WWProcessor::end() {
-  // Cleanup your mess here !
-}
+void WWProcessor::end() { this->save_tree(); }

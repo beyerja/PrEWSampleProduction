@@ -1,7 +1,16 @@
 #ifndef LIB_WWPROCESSOR_H
 #define LIB_WWPROCESSOR_H 1
 
+#include <Utils/HeaderInfo.h>
+#include <WW/WWObservables.h>
 #include "marlin/Processor.h"
+
+// Includes from ROOT
+#include <TFile.h>
+#include <TTree.h>
+
+// Standard library
+#include <memory>
 
 class WWProcessor : public marlin::Processor {
 public:
@@ -64,6 +73,20 @@ private:
   std::string m_mcCollectionName = {""};
   std::string m_file_path{""};
   std::string m_tree_name{""};
+
+  // ---------------------------------------------------------------------------
+
+  // TFile and TTree with result output
+  std::unique_ptr<TFile> m_file{};
+  TTree *m_tree{}; // Needs to be pure pointer, belongs to file
+  
+  // Output information
+  Utils::HeaderInfo m_header {};
+  WW::WWObservables m_observables{};
+
+  // Internal functions
+  void create_tree();
+  void save_tree();
 };
 
 #endif
