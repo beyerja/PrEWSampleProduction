@@ -1,8 +1,3 @@
-#######################################################
-# cmake file for building %(repository)s analysis package
-# @author Ete Remi, DESY
-#######################################################
-
 # -------------------------------------------------
 # include directories
 include_directories( include )
@@ -14,6 +9,7 @@ include_directories( include )
 # in the top level directory of your project 
 aux_source_directory( src/Utils SRC_FILES )
 aux_source_directory( src/WW SRC_FILES )
+aux_source_directory( src/WW/Processor SRC_FILES )
 add_shared_library( ${PROJECT_NAME} ${SRC_FILES} )
 
 # Link external libraries
