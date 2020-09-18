@@ -3,6 +3,9 @@
 
 #include <Utils/HeaderInfo.h>
 #include <WW/WWObservables.h>
+
+// Includes from iLCSoft
+#include "EVENT/MCParticle.h"
 #include "marlin/Processor.h"
 
 // Includes from ROOT
@@ -87,6 +90,12 @@ private:
   // Internal functions
   void create_tree();
   void save_tree();
+
+  void extract_observables(const EVENT::MCParticleVec &mcps);
+  void extract_lab_observables(const EVENT::MCParticle &l);
+  void extract_ee_observables(const EVENT::MCParticle &Wminus);
+  void extract_Wl_observables(const EVENT::MCParticle &Wl,
+                              const EVENT::MCParticle &l);
 };
 
 #endif

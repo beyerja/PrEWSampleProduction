@@ -71,10 +71,8 @@ void WWProcessor::processEvent(EVENT::LCEvent *event) {
   // Read the observables
   auto mcps =
       Utils::Collections::read<EVENT::MCParticle>(event, m_mcCollectionName);
-  for (const auto mcp_ptr : mc_particles) {
-    auto tlv = Utils::MC::get_tlv(*mcp_ptr);
-  }
-  
+  this->extract_observables(mcps);
+
   // Fill the event data into the tree
   m_tree->Fill();
 }
