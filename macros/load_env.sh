@@ -16,3 +16,6 @@ elif [ ! -z "${ILCSOFT}" ]; then
 else 
   source ${ilcsoft_dir}/init_ilcsoft.sh
 fi
+
+# Add the MarlinHelp package path
+export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/afs/desy.de/group/flc/pool/beyerjac/TGCAnalysis/SampleProduction/MarlinAnalysis/MarlinHelp/lib

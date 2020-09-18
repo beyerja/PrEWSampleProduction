@@ -34,16 +34,13 @@ LINK_LIBRARIES( ${ROOT_LIBRARIES} )
 ADD_DEFINITIONS( ${ROOT_DEFINITIONS} )
 
 # Custom libraries
+set(MarlinHelp_dir /afs/desy.de/group/flc/pool/beyerjac/TGCAnalysis/SampleProduction/MarlinAnalysis/MarlinHelp)
 find_library( 
   MarlinHelp MarlinHelp 
-  HINTS 
-    /afs/desy.de/group/flc/pool/beyerjac/TGCAnalysis/SampleProduction/MarlinAnalysis/MarlinHelp/lib
+  HINTS ${MarlinHelp_dir}/lib/MarlinHelp
   REQUIRED 
 )
-get_filename_component(MarlinHelp_lib_dir ${MarlinHelp} DIRECTORY)
-include_directories(
-  ${MarlinHelp_lib_dir}/../source/MarlinHelp/include
-)
+include_directories(${MarlinHelp_dir}/include)
 
 # Compile you project
 ADD_SUBDIRECTORY( source )

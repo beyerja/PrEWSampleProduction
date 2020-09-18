@@ -7,9 +7,9 @@
   
   <global>
     <!-- Change the input file here or by command line -->
-    <parameter name="LCIOInputFiles"> /pnfs/desy.de/ilc/user/b/berggren/mc-opt.dsk/generated/250-SetA/4f/E250-SetA.P4f_ww_sl.Gwhizard-2_8_0.eL.pR.I400030.0.slcio </parameter>
+    <parameter name="LCIOInputFiles"> /nfs/dust/ilc/user/skawada/mini-DST/massSGVprod/sgvdst8/SGV-mini-DST-E250-SetA.P4f_ww_sl.Gwhizard-2_8_4.eL.pR.I500078_SGVDST.0.slcio </parameter>
     <!-- The maximum number of events + runs to process -->
-    <parameter name="MaxRecordNumber" value="10"/>
+    <parameter name="MaxRecordNumber" value="0"/>
     <!-- The number of events to skip on start -->
     <parameter name="SkipNEvents" value="0"/>
     <parameter name="SupressCheck" value="false"/>
@@ -22,7 +22,10 @@
   <!-- Your processor configuration here after -->
   <processor name="MyWWProcessor" type="WWProcessor">
     <!-- The MC particle collection name -->
-    <parameter name="MCParticleCollection" lcioInType="MCParticle"> MCParticle </parameter>
+    <parameter name="MCParticleCollection" lcioInType="MCParticle"> MCParticlesSkimmed </parameter>
+    <parameter name="OutputFilePath"> 
+      /nfs/dust/ilc/group/ild/beyerjac/TGCAnalysis/SampleProduction/NewMCProduction/Test/WWtest.root
+    </parameter>
   </processor>
   
 </marlin>

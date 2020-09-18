@@ -1,9 +1,12 @@
 // -- your process header
 #include "WW/WWProcessor.h"
 
+// Custom headers
+#include <Utils/Collections.h>
+#include <Utils/MC.h>
+
 // -- lcio headers
 #include "EVENT/LCCollection.h"
-#include "EVENT/MCParticle.h"
 #include "UTIL/LCTOOLS.h"
 
 // This line allows to register your processor in marlin when calling "Marlin
@@ -28,10 +31,10 @@ WWProcessor::WWProcessor() : marlin::Processor("WWProcessor") {
       std::string("MCParticle")); // That's the default value, in case
 
   // Register a parameter
-  // registerProcessorParameter("PfoEnergyCut",
-  //   "A cut on pfo energy to apply",
-  //   m_pfoEnergyCut,
-  //   0.f);
+  registerProcessorParameter("OutputFilePath", "Path of the output ROOT file",
+                             m_file_path, std::string("./output.root"));
+  registerProcessorParameter("OutputTreeName", "Name of the output TTree",
+                             m_tree_name, std::string("WWObservables"));
 }
 
 //------------------------------------------------------------------------------
@@ -39,6 +42,9 @@ WWProcessor::WWProcessor() : marlin::Processor("WWProcessor") {
 void WWProcessor::init() {
   // Usually a good idea to print parameters
   printParameters(); // method from marlin::Processor
+
+  // Set up the output tree
+  this->create_tree();
 }
 
 //------------------------------------------------------------------------------
@@ -56,18 +62,21 @@ void WWProcessor::processEvent(EVENT::LCEvent *event) {
   streamlog_out(DEBUG) << "Processing event no " << event->getEventNumber()
                        << " - run " << event->getEventNumber() << std::endl;
 
-  // Collect MC collection
-  EVENT::LCCollection *mc_collection{};
-  try {
-    mc_collection = event->getCollection(m_mcCollectionName);
-  } catch (EVENT::DataNotAvailableException &) {
-    streamlog_out(WARNING) << "MC collection '" << m_mcCollectionName
-                           << "' is not available !" << std::endl;
-  }
+  // Read the header info
+  m_header.read(*event);
+
+  // Reset the observables
+  m_observables.reset();
+
+  // Read the observables
+  auto mcps =
+      Utils::Collections::read<EVENT::MCParticle>(event, m_mcCollectionName);
+  this->extract_observables(mcps);
+
+  // Fill the event data into the tree
+  m_tree->Fill();
 }
 
 //------------------------------------------------------------------------------
 
-void WWProcessor::end() {
-  // Cleanup your mess here !
-}
+void WWProcessor::end() { this->save_tree(); }
