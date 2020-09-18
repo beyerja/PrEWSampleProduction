@@ -60,8 +60,10 @@ private:
   // Initialize your members in the class definition to
   // be more efficient and avoid compiler warnings
 
-  /// The reconstructed particle collection name
+  // --- Input parameters ------------------------------------------------------
   std::string m_mcCollectionName = {""};
+  std::string m_file_path{""};
+  std::string m_tree_name{""};
 };
 
 #endif

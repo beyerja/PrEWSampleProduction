@@ -32,10 +32,10 @@ WWProcessor::WWProcessor() : marlin::Processor("WWProcessor") {
       std::string("MCParticle")); // That's the default value, in case
 
   // Register a parameter
-  // registerProcessorParameter("PfoEnergyCut",
-  //   "A cut on pfo energy to apply",
-  //   m_pfoEnergyCut,
-  //   0.f);
+  registerProcessorParameter("OutputFilePath", "Path of the output ROOT file",
+                             m_file_path, std::string("./output.root"));
+  registerProcessorParameter("OutputTreeName", "Name of the output TTree",
+                             m_tree_name, std::string("WWObservables"));
 }
 
 //------------------------------------------------------------------------------
