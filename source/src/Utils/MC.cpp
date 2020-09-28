@@ -47,9 +47,11 @@ bool MC::is_type(const EVENT::MCParticle &mcp, const std::vector<int> &ids_plus,
   std::vector<int> ids{};
   if ((sign == 0) || (sign == 1)) {
     ids.insert(ids.end(), ids_plus.begin(), ids_plus.end());
-  } else if ((sign == 0) || (sign == -1)) {
+  }
+  if ((sign == 0) || (sign == -1)) {
     ids.insert(ids.end(), ids_minus.begin(), ids_minus.end());
-  } else {
+  } 
+  if ((sign != 0) && (std::abs(sign) != 1)){
     throw std::invalid_argument("Looking for invalid sign: " +
                                 std::to_string(sign));
   }
