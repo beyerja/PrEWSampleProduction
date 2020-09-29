@@ -23,3 +23,7 @@ Run the WW example using:
 ```shell
 Marlin ./scripts/WWProcessorTest.xml
 ```
+
+### How to create PrEW fit input
+
+Python code to convert the Marlin processor output into PrEW fit input is provided in the `PrEWInputProduction` directory.
