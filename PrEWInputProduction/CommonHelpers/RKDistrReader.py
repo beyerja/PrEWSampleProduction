@@ -62,17 +62,24 @@ class RKDistrReader:
             
             distr.bin_centers = np.array([[float(entry.angular_center[row][col]) for col in range(n_cols)] for row in range(n_rows)])
             
-            distr.xsections_LR = [float(xsection) for xsection in entry.differential_sigma_LR]
-            distr.xsections_RL = [float(xsection) for xsection in entry.differential_sigma_RL]
-            distr.xsections_LL = [float(xsection) for xsection in entry.differential_sigma_LL]
-            distr.xsections_RR = [float(xsection) for xsection in entry.differential_sigma_RR]
+            distr.xsections_LR = np.array([float(xsection) for xsection in entry.differential_sigma_LR])
+            distr.xsections_RL = np.array([float(xsection) for xsection in entry.differential_sigma_RL])
+            distr.xsections_LL = np.array([float(xsection) for xsection in entry.differential_sigma_LL])
+            distr.xsections_RR = np.array([float(xsection) for xsection in entry.differential_sigma_RR])
             
             distr.coef_labels = [str(label) for label in entry.differential_PNPC_label]
-            distr.coefs_LR = entry.differential_PNPC_LR
-            distr.coefs_RL = entry.differential_PNPC_RL
-            distr.coefs_LL = entry.differential_PNPC_LL
-            distr.coefs_RR = entry.differential_PNPC_RR
+            distr.coefs_LR = np.array([ [float(entry.differential_PNPC_LR[row][col]) for col in range(entry.differential_PNPC_LR.GetNcols())] for row in range(n_rows)])
+            distr.coefs_RL = np.array([ [float(entry.differential_PNPC_RL[row][col]) for col in range(entry.differential_PNPC_RL.GetNcols())] for row in range(n_rows)])
+            distr.coefs_LL = np.array([ [float(entry.differential_PNPC_LL[row][col]) for col in range(entry.differential_PNPC_LL.GetNcols())] for row in range(n_rows)])
+            distr.coefs_RR = np.array([ [float(entry.differential_PNPC_RR[row][col]) for col in range(entry.differential_PNPC_RR.GetNcols())] for row in range(n_rows)])
             self.distrs.append(distr)
+
+# ------------------------------------------------------------------------------
+
+RKDistrCoords = {
+# "single-W" : [""],
+  "WW" : ["thetaW","thetal","varphil"]
+}
 
 # ------------------------------------------------------------------------------
 
@@ -80,9 +87,17 @@ def test():
     """ Test the RKDistr and RKDistrReader classes.
     """
     reader = RKDistrReader(
-        "/home/jakob/Documents/DESY/MountPoints/POOLMount/TGCAnalysis/GlobalFit/UnifiedApproach/MinimizationProcessFiles/ROOTfiles/MinimizationProcessesListFile_500_250Full_Elektroweak_menu_2018_04_03.root",
+        # "/afs/desy.de/group/flc/pool/beyerjac/TGCAnalysis/GlobalFit/UnifiedApproach/MinimizationProcessFiles/ROOTfiles/MinimizationProcessesListFile_500_250Full_Elektroweak_menu_2018_04_03.root",
+        "/nfs/dust/ilc/group/ild/beyerjac/TGCAnalysis/SampleProduction/WW_charge_separated/distributions/combined/Distribution_250GeV_WW_semilep_AntiMuNu.root",
         "MinimizationProcesses250GeV"
     )
+    
+    for distr in reader.distrs:
+        print(distr.name)
+        if (len(distr.bin_centers[0]) == 3):
+            print([distr.bin_centers[:,0][10*10*i] for i in range(20)])
+            print([distr.bin_centers[:,1][10*i] for i in range(12)])
+            print(distr.bin_centers[:,2][:12])
 
 # ------------------------------------------------------------------------------
 

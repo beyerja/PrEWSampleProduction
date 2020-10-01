@@ -88,11 +88,13 @@ def main():
 
     # Input
     input = IH.InputInfo(
-        file_path = "/home/jakob/Documents/DESY/MountPoints/DUSTMount/TGCAnalysis/SampleProduction/NewMCProduction/Test/WWtest.root",
+        # file_path = "/home/jakob/Documents/DESY/MountPoints/DUSTMount/TGCAnalysis/SampleProduction/NewMCProduction/Test/WWtest.root",
+        file_path = "/nfs/dust/ilc/group/ild/beyerjac/TGCAnalysis/SampleProduction/NewMCProduction/Test/WWtest.root",
         tree_name = "WWObservables", energy = 250)
 
     # Output settings
-    output_dir = "/home/jakob/Documents/DESY/MountPoints/DUSTMount/TGCAnalysis/SampleProduction/NewMCProduction/WW"
+    # output_dir = "/home/jakob/Documents/DESY/MountPoints/DUSTMount/TGCAnalysis/SampleProduction/NewMCProduction/WW"
+    output_dir = "/nfs/dust/ilc/group/ild/beyerjac/TGCAnalysis/SampleProduction/NewMCProduction/WW"
 
     # Coordinates
     coords = [
@@ -100,6 +102,8 @@ def main():
         DH.Coordinate("costh_l_star", 20, -1, 1),
         DH.Coordinate("phi_l_star", 20, -math.pi, math.pi),
     ]
+
+    #  TODO Change metadata setup for coordinates (making it same for coefficients: COORD:coord_name, COEF:coef_name) => In ROOT find those branches
 
     # Create all WW distributions
     create_WW_output(
