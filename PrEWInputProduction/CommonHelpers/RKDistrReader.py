@@ -67,7 +67,7 @@ class RKDistrReader:
             distr.xsections_LL = np.array([float(xsection) for xsection in entry.differential_sigma_LL])
             distr.xsections_RR = np.array([float(xsection) for xsection in entry.differential_sigma_RR])
             
-            distr.coef_labels = [str(label) for label in entry.differential_PNPC_label]
+            distr.coef_labels = [label for label in str(entry.differential_PNPC_label).split(";") if not label == ""]
             distr.coefs_LR = np.array([ [float(entry.differential_PNPC_LR[row][col]) for col in range(entry.differential_PNPC_LR.GetNcols())] for row in range(n_rows)])
             distr.coefs_RL = np.array([ [float(entry.differential_PNPC_RL[row][col]) for col in range(entry.differential_PNPC_RL.GetNcols())] for row in range(n_rows)])
             distr.coefs_LL = np.array([ [float(entry.differential_PNPC_LL[row][col]) for col in range(entry.differential_PNPC_LL.GetNcols())] for row in range(n_rows)])
@@ -98,6 +98,14 @@ def test():
             print([distr.bin_centers[:,0][10*10*i] for i in range(20)])
             print([distr.bin_centers[:,1][10*i] for i in range(12)])
             print(distr.bin_centers[:,2][:12])
+            
+            for i in range(len(distr.coefs_LR[0])):
+                for b in range(int(len(distr.coefs_LR)/10)):
+                    coefs = distr.coefs_LR[10*b:10*b+10,i]
+                    mean = np.mean(coefs)
+                    std = np.std(coefs)
+                    if ( std > 0.001*abs(mean) ):
+                        print("Bin{}: Coef{}: Mean = {}, Std = {}".format(b,i,mean,std))
 
 # ------------------------------------------------------------------------------
 
