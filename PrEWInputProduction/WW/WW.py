@@ -11,6 +11,7 @@ import CSVMetadata as CSVM
 import DistrHelpers as DH
 import InputHelpers as IH
 import OutputHelpers as OH
+import RKCoefMatcher as RKCM
 
 # ------------------------------------------------------------------------------
 
@@ -63,8 +64,14 @@ def create_WW_output(input, output, coords, cuts):
 
     # ----------------------- Producing PrEW input -----------------------------
 
+    # Extract bin centers and cross sections from the histogram
+    data = DH.get_data(th3, coords)
+    
+    # Try to find coefficients from RK distribution
+    coef_matcher = RKCM.default_coef_matcher()
+    data = coef_matcher.add_coefs_to_data(output.distr_name, eM_chi, eP_chi, data)
+    
     # Create a pandas dataframe
-    data = DH.get_data(th3)
     df = pd.DataFrame(data)
 
     # Write the dataframe to a csv file
@@ -102,8 +109,6 @@ def main():
         DH.Coordinate("costh_l_star", 10, -0.925925925925926, 0.925925925925926),
         DH.Coordinate("phi_l_star", 10, -math.pi, math.pi),
     ]
-
-    #  TODO Change metadata setup for coordinates (making it same for coefficients: COORD:coord_name, COEF:coef_name) => In ROOT find those branches
 
     # Create all WW distributions
     create_WW_output(
