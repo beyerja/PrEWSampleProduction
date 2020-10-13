@@ -98,9 +98,9 @@ def main():
 
     # Coordinates
     coords = [
-        DH.Coordinate("costh_Wminus_star", 20, -1, 1),
-        DH.Coordinate("costh_l_star", 20, -1, 1),
-        DH.Coordinate("phi_l_star", 20, -math.pi, math.pi),
+        DH.Coordinate("costh_Wminus_star", 20, -0.9695290858725761, 0.9695290858725761),
+        DH.Coordinate("costh_l_star", 10, -0.925925925925926, 0.925925925925926),
+        DH.Coordinate("phi_l_star", 10, -math.pi, math.pi),
     ]
 
     #  TODO Change metadata setup for coordinates (making it same for coefficients: COORD:coord_name, COEF:coef_name) => In ROOT find those branches
