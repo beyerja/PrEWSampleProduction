@@ -11,6 +11,7 @@ import CSVMetadata as CSVM
 import DistrHelpers as DH
 import InputHelpers as IH
 import OutputHelpers as OH
+import RKCoefMatcher as RKCM
 
 # ------------------------------------------------------------------------------
 
@@ -63,8 +64,14 @@ def create_WW_output(input, output, coords, cuts):
 
     # ----------------------- Producing PrEW input -----------------------------
 
+    # Extract bin centers and cross sections from the histogram
+    data = DH.get_data(th3, coords)
+    
+    # Try to find coefficients from RK distribution
+    coef_matcher = RKCM.default_coef_matcher()
+    data = coef_matcher.add_coefs_to_data(output.distr_name, eM_chi, eP_chi, data)
+    
     # Create a pandas dataframe
-    data = DH.get_data(th3)
     df = pd.DataFrame(data)
 
     # Write the dataframe to a csv file
@@ -88,17 +95,19 @@ def main():
 
     # Input
     input = IH.InputInfo(
-        file_path = "/home/jakob/Documents/DESY/MountPoints/DUSTMount/TGCAnalysis/SampleProduction/NewMCProduction/Test/WWtest.root",
+        # file_path = "/home/jakob/Documents/DESY/MountPoints/DUSTMount/TGCAnalysis/SampleProduction/NewMCProduction/Test/WWtest.root",
+        file_path = "/nfs/dust/ilc/group/ild/beyerjac/TGCAnalysis/SampleProduction/NewMCProduction/Test/WWtest.root",
         tree_name = "WWObservables", energy = 250)
 
     # Output settings
-    output_dir = "/home/jakob/Documents/DESY/MountPoints/DUSTMount/TGCAnalysis/SampleProduction/NewMCProduction/WW"
+    # output_dir = "/home/jakob/Documents/DESY/MountPoints/DUSTMount/TGCAnalysis/SampleProduction/NewMCProduction/WW"
+    output_dir = "/nfs/dust/ilc/group/ild/beyerjac/TGCAnalysis/SampleProduction/NewMCProduction/WW"
 
     # Coordinates
     coords = [
-        DH.Coordinate("costh_Wminus_star", 20, -1, 1),
-        DH.Coordinate("costh_l_star", 20, -1, 1),
-        DH.Coordinate("phi_l_star", 20, -math.pi, math.pi),
+        DH.Coordinate("costh_Wminus_star", 20, -0.9695290858725761, 0.9695290858725761),
+        DH.Coordinate("costh_l_star", 10, -0.925925925925926, 0.925925925925926),
+        DH.Coordinate("phi_l_star", 10, -math.pi, math.pi),
     ]
 
     # Create all WW distributions

@@ -8,9 +8,16 @@ Make sure to load modern ROOT (e.g. 6.18) and Python (e.g. 3.8) versions. Some a
 
 ## Usage
 
+Proper (modern) Python and ROOT versions must be loaded to run the scripts.
+On the NAF system this can be done using the `load_python_env.sh` script.
+
+```shell
+  source load_python_env.sh
+```
+
 Each process has its own folder. The script that is named `[process].py` can be executed with Python to produce the PrEW input sample, e.g.:
 
-```
+```shell
   cd WW && python WW.py
 ```
 
