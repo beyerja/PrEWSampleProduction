@@ -73,13 +73,22 @@ class RKDistrReader:
             distr.coefs_LL = np.array([ [float(entry.differential_PNPC_LL[row][col]) for col in range(entry.differential_PNPC_LL.GetNcols())] for row in range(n_rows)])
             distr.coefs_RR = np.array([ [float(entry.differential_PNPC_RR[row][col]) for col in range(entry.differential_PNPC_RR.GetNcols())] for row in range(n_rows)])
             self.distrs.append(distr)
-
-# ------------------------------------------------------------------------------
-
-RKDistrCoords = {
-# "single-W" : [""],
-  "WW" : ["thetaW","thetal","varphil"]
-}
+            
+    def get_distr(self, name):
+        """ Return the distribution of the given name.
+        """
+        found_distrs = []
+        for distr in self.distrs:
+            if (distr.name == name):
+                found_distrs.append(distr)
+                
+        n_found = len(found_distrs)
+        if (n_found == 0):
+            raise ValueError("Didn't find distribution {}".format(name))
+        elif (n_found > 1):
+            raise ValueError("Found more than one distribution {}, found {}".format(name, n_found))
+          
+        return found_distrs[0]
 
 # ------------------------------------------------------------------------------
 
