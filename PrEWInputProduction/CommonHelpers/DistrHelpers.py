@@ -19,11 +19,11 @@ class Coordinate:
 
 # ------------------------------------------------------------------------------
 
-def get_data_1d(root_hist):
+def get_data_1d(root_hist, coords):
     """ Extract data from TH1.
     """
     # Find bin centers and values, skip overflow/underflow bins
-    bin_centers=[]
+    bin_centers_x=[]
     bin_values=[]
     for x_bin in range(0, root_hist.GetNbinsX()+2):
         bin = root_hist.GetBin(x_bin)
@@ -33,21 +33,23 @@ def get_data_1d(root_hist):
             continue
     
         # Collect bin information and fill into array
-        center_x = root_hist.GetXaxis().GetBinCenter(x_bin)
-        center_str = "{}".format(center_x)
-        bin_centers.append(center_str)
+        bin_centers_x.append(root_hist.GetXaxis().GetBinCenter(x_bin))
         
         value = root_hist.GetBinContent(bin)
         bin_values.append(value)
           
-    data = {"Bin centers": bin_centers, "Cross sections": bin_values}
+    data = {
+      "BinCenters:{}".format(coords[0].name) : bin_centers_x, 
+      "Cross sections": bin_values
+    }
     return data
   
-def get_data_2d(root_hist):
+def get_data_2d(root_hist, coords):
     """ Extract data from TH2.
     """
     # Find bin centers and values, skip overflow/underflow bins
-    bin_centers=[]
+    bin_centers_x=[]
+    bin_centers_y=[]
     bin_values=[]
     for x_bin in range(0, root_hist.GetNbinsX()+2):
         for y_bin in range(0, root_hist.GetNbinsY()+2):
@@ -58,22 +60,26 @@ def get_data_2d(root_hist):
                 continue
         
             # Collect bin information and fill into array
-            center_x = root_hist.GetXaxis().GetBinCenter(x_bin)
-            center_y = root_hist.GetYaxis().GetBinCenter(y_bin)
-            center_str = "{}:{}".format(center_x,center_y)
-            bin_centers.append(center_str)
+            bin_centers_x.append(root_hist.GetXaxis().GetBinCenter(x_bin))
+            bin_centers_y.append(root_hist.GetYaxis().GetBinCenter(y_bin))
             
             value = root_hist.GetBinContent(bin)
             bin_values.append(value)
           
-    data = {"Bin centers": bin_centers, "Cross sections": bin_values}
+    data = {
+      "BinCenters:{}".format(coords[0].name) : bin_centers_x, 
+      "BinCenters:{}".format(coords[1].name) : bin_centers_y, 
+      "Cross sections": bin_values
+    }
     return data
   
-def get_data_3d(root_hist):
+def get_data_3d(root_hist, coords):
     """ Extract data from TH3.
     """
     # Find bin centers and values, skip overflow/underflow bins
-    bin_centers=[]
+    bin_centers_x=[]
+    bin_centers_y=[]
+    bin_centers_z=[]
     bin_values=[]
     for x_bin in range(0, root_hist.GetNbinsX()+2):
         for y_bin in range(0, root_hist.GetNbinsY()+2):
@@ -85,21 +91,24 @@ def get_data_3d(root_hist):
                     continue
             
                 # Collect bin information and fill into array
-                center_x = root_hist.GetXaxis().GetBinCenter(x_bin)
-                center_y = root_hist.GetYaxis().GetBinCenter(y_bin)
-                center_z = root_hist.GetZaxis().GetBinCenter(z_bin)
-                center_str = "{}:{}:{}".format(center_x,center_y,center_z)
-                bin_centers.append(center_str)
+                bin_centers_x.append(root_hist.GetXaxis().GetBinCenter(x_bin))
+                bin_centers_y.append(root_hist.GetYaxis().GetBinCenter(y_bin))
+                bin_centers_z.append(root_hist.GetZaxis().GetBinCenter(z_bin))
                 
                 value = root_hist.GetBinContent(bin)
                 bin_values.append(value)
           
-    data = {"Bin centers": bin_centers, "Cross sections": bin_values}
+    data = {
+      "BinCenters:{}".format(coords[0].name) : bin_centers_x, 
+      "BinCenters:{}".format(coords[1].name) : bin_centers_y, 
+      "BinCenters:{}".format(coords[2].name) : bin_centers_z, 
+      "Cross sections": bin_values
+    }
     return data
 
 # ------------------------------------------------------------------------------
 
-def get_data(root_hist):
+def get_data(root_hist, coords):
     """ Extract the bin centers and cross section values from the given
         histogram.
     """
@@ -108,11 +117,11 @@ def get_data(root_hist):
 
     # Exact extraction depends on dimensionality
     if (dim == 1):
-        data = get_data_1d(root_hist)
+        data = get_data_1d(root_hist, coords)
     elif (dim == 2):
-        data = get_data_2d(root_hist)
+        data = get_data_2d(root_hist, coords)
     elif (dim == 3):
-        data = get_data_3d(root_hist)
+        data = get_data_3d(root_hist, coords)
       
     return data
 
