@@ -23,33 +23,36 @@ def get_data_1d(root_hist, coords):
     """ Extract data from TH1.
     """
     # Find bin centers and values, skip overflow/underflow bins
-    bin_centers_x=[]
+    bins_x={"Centers": [], "LowerEdges": [], "UpperEdges": []}
     bin_values=[]
     for x_bin in range(0, root_hist.GetNbinsX()+2):
         bin = root_hist.GetBin(x_bin)
-        
+            
         # Skip overflow and underflow bins
         if root_hist.IsBinUnderflow(bin) or root_hist.IsBinOverflow(bin): 
             continue
     
         # Collect bin information and fill into array
-        bin_centers_x.append(root_hist.GetXaxis().GetBinCenter(x_bin))
-        
+        bins_x["Centers"].append(root_hist.GetXaxis().GetBinCenter(x_bin))
+        bins_x["LowerEdges"].append(root_hist.GetXaxis().GetBinLowEdge(x_bin))
+        bins_x["UpperEdges"].append(root_hist.GetXaxis().GetBinUpEdge(x_bin))
         value = root_hist.GetBinContent(bin)
         bin_values.append(value)
-          
-    data = {
-      "BinCenters:{}".format(coords[0].name) : bin_centers_x, 
-      "Cross sections": bin_values
-    }
+    
+    # Store the data in a dictionary for pandas
+    data = { "BinCenters:{}".format(coords[0].name): bin_dims[d]["Centers"],
+             "BinLow:{}".format(coords[0].name): bin_dims[d]["LowerEdges"],
+             "BinUp:{}".format(coords[0].name): bin_dims[d]["UpperEdges"],
+             "Cross sections": bin_values }
+    
     return data
   
 def get_data_2d(root_hist, coords):
     """ Extract data from TH2.
     """
     # Find bin centers and values, skip overflow/underflow bins
-    bin_centers_x=[]
-    bin_centers_y=[]
+    bins_x={"Centers": [], "LowerEdges": [], "UpperEdges": []}
+    bins_y={"Centers": [], "LowerEdges": [], "UpperEdges": []}
     bin_values=[]
     for x_bin in range(0, root_hist.GetNbinsX()+2):
         for y_bin in range(0, root_hist.GetNbinsY()+2):
@@ -60,26 +63,33 @@ def get_data_2d(root_hist, coords):
                 continue
         
             # Collect bin information and fill into array
-            bin_centers_x.append(root_hist.GetXaxis().GetBinCenter(x_bin))
-            bin_centers_y.append(root_hist.GetYaxis().GetBinCenter(y_bin))
-            
+            bins_x["Centers"].append(root_hist.GetXaxis().GetBinCenter(x_bin))
+            bins_y["Centers"].append(root_hist.GetYaxis().GetBinCenter(y_bin))
+            bins_x["LowerEdges"].append(root_hist.GetXaxis().GetBinLowEdge(x_bin))
+            bins_y["LowerEdges"].append(root_hist.GetYaxis().GetBinLowEdge(y_bin))
+            bins_x["UpperEdges"].append(root_hist.GetXaxis().GetBinUpEdge(x_bin))
+            bins_y["UpperEdges"].append(root_hist.GetYaxis().GetBinUpEdge(y_bin))
             value = root_hist.GetBinContent(bin)
             bin_values.append(value)
-          
-    data = {
-      "BinCenters:{}".format(coords[0].name) : bin_centers_x, 
-      "BinCenters:{}".format(coords[1].name) : bin_centers_y, 
-      "Cross sections": bin_values
-    }
+    
+    # Store the data in a dictionary for pandas
+    data = {}
+    bin_dims = [bins_x,bins_y]
+    for d in range(len(bin_dims)):
+        data["BinCenters:{}".format(coords[d].name)] = bin_dims[d]["Centers"]
+        data["BinLow:{}".format(coords[d].name)] = bin_dims[d]["LowerEdges"]
+        data["BinUp:{}".format(coords[d].name)] = bin_dims[d]["UpperEdges"]
+    data["Cross sections"] = bin_values
+    
     return data
   
 def get_data_3d(root_hist, coords):
     """ Extract data from TH3.
     """
     # Find bin centers and values, skip overflow/underflow bins
-    bin_centers_x=[]
-    bin_centers_y=[]
-    bin_centers_z=[]
+    bins_x={"Centers": [], "LowerEdges": [], "UpperEdges": []}
+    bins_y={"Centers": [], "LowerEdges": [], "UpperEdges": []}
+    bins_z={"Centers": [], "LowerEdges": [], "UpperEdges": []}
     bin_values=[]
     for x_bin in range(0, root_hist.GetNbinsX()+2):
         for y_bin in range(0, root_hist.GetNbinsY()+2):
@@ -91,19 +101,27 @@ def get_data_3d(root_hist, coords):
                     continue
             
                 # Collect bin information and fill into array
-                bin_centers_x.append(root_hist.GetXaxis().GetBinCenter(x_bin))
-                bin_centers_y.append(root_hist.GetYaxis().GetBinCenter(y_bin))
-                bin_centers_z.append(root_hist.GetZaxis().GetBinCenter(z_bin))
-                
+                bins_x["Centers"].append(root_hist.GetXaxis().GetBinCenter(x_bin))
+                bins_y["Centers"].append(root_hist.GetYaxis().GetBinCenter(y_bin))
+                bins_z["Centers"].append(root_hist.GetZaxis().GetBinCenter(z_bin))
+                bins_x["LowerEdges"].append(root_hist.GetXaxis().GetBinLowEdge(x_bin))
+                bins_y["LowerEdges"].append(root_hist.GetYaxis().GetBinLowEdge(y_bin))
+                bins_z["LowerEdges"].append(root_hist.GetZaxis().GetBinLowEdge(z_bin))
+                bins_x["UpperEdges"].append(root_hist.GetXaxis().GetBinUpEdge(x_bin))
+                bins_y["UpperEdges"].append(root_hist.GetYaxis().GetBinUpEdge(y_bin))
+                bins_z["UpperEdges"].append(root_hist.GetZaxis().GetBinUpEdge(z_bin))
                 value = root_hist.GetBinContent(bin)
                 bin_values.append(value)
-          
-    data = {
-      "BinCenters:{}".format(coords[0].name) : bin_centers_x, 
-      "BinCenters:{}".format(coords[1].name) : bin_centers_y, 
-      "BinCenters:{}".format(coords[2].name) : bin_centers_z, 
-      "Cross sections": bin_values
-    }
+    
+    # Store the data in a dictionary for pandas
+    data = {}
+    bin_dims = [bins_x,bins_y,bins_z]
+    for d in range(len(bin_dims)):
+        data["BinCenters:{}".format(coords[d].name)] = bin_dims[d]["Centers"]
+        data["BinLow:{}".format(coords[d].name)] = bin_dims[d]["LowerEdges"]
+        data["BinUp:{}".format(coords[d].name)] = bin_dims[d]["UpperEdges"]
+    data["Cross sections"] = bin_values
+    
     return data
 
 # ------------------------------------------------------------------------------
