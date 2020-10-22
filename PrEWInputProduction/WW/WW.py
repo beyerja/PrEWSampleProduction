@@ -12,8 +12,8 @@ import DistrHelpers as DH
 import InputHelpers as IH
 import OutputHelpers as OH
 import RKCoefMatcher as RKCM
-sys.path.append("../Cuts")
-import MuonAcceptance as CMA
+sys.path.append("../Systematics")
+import MuonAcceptance as SMA
 
 # ------------------------------------------------------------------------------
 
@@ -43,8 +43,8 @@ def create_WW_output(input, output, coords, cuts):
     th3 = th3_ptr.GetValue()
 
     # Prepare the muon acceptance box
-    muon_acc_cut = CMA.default_acc_cut()
-    muon_acc = CMA.MuonAccParametrisation(rdf_after_cuts, muon_acc_cut, 0.001, 
+    muon_acc_cut = SMA.default_acc_cut()
+    muon_acc = SMA.MuonAccParametrisation(rdf_after_cuts, muon_acc_cut, 0.001, 
                                           "costh_l", output.distr_name, coords)
 
     print("For distr {}:\n\tBefore cuts: {} , after cuts: {} ({}%)".format(
