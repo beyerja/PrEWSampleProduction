@@ -14,10 +14,11 @@ import OutputHelpers as OH
 import RKCoefMatcher as RKCM
 sys.path.append("../Systematics")
 import MuonAcceptance as SMA
+import SystematicsOptions as SSO
 
 # ------------------------------------------------------------------------------
 
-def create_WW_output(input, output, coords, cuts):
+def create_WW_output(input, output, coords, cuts, syst=SSO.SystematicsOptions()):
     # ----------------------- Create RDF and set commands ----------------------
     # Read in the tree
     rdf = input.get_rdf()
@@ -43,9 +44,12 @@ def create_WW_output(input, output, coords, cuts):
     th3 = th3_ptr.GetValue()
 
     # Prepare the muon acceptance box
-    muon_acc_cut = SMA.default_acc_cut()
-    muon_acc = SMA.MuonAccParametrisation(rdf_after_cuts, muon_acc_cut, 0.001, 
-                                          "costh_l", output.distr_name, coords)
+    muon_acc = None
+    if syst.use_muon_acc:
+      muon_acc_cut = SMA.default_acc_cut()
+      muon_acc = SMA.MuonAccParametrisation(rdf_after_cuts, muon_acc_cut, 0.001, 
+                                            "costh_l", output.distr_name, 
+                                            coords)
 
     print("For distr {}:\n\tBefore cuts: {} , after cuts: {} ({}%)".format(
         output.distr_name, n_total, n_after_cuts, n_after_cuts/n_total*100.0))
@@ -79,7 +83,8 @@ def create_WW_output(input, output, coords, cuts):
     data = coef_matcher.add_coefs_to_data(output.distr_name, eM_chi, eP_chi, data)
     
     # Try extracting the differential coefficients for the muon acceptance box
-    data = muon_acc.add_coefs_to_data(data)
+    if muon_acc is not None:
+      data = muon_acc.add_coefs_to_data(data)
     
     # Create a pandas dataframe
     df = pd.DataFrame(data)
@@ -94,7 +99,10 @@ def create_WW_output(input, output, coords, cuts):
     metadata.add("energy", input.energy)
     metadata.add("e- chirality", eM_chi)
     metadata.add("e+ chirality", eP_chi)
-    muon_acc.add_coefs_to_metadata(metadata)
+    
+    if muon_acc is not None:
+      muon_acc.add_coefs_to_metadata(metadata)
+      
     metadata.write(file_path)
 
 # ------------------------------------------------------------------------------
@@ -125,11 +133,13 @@ def main():
     create_WW_output(
       input = input, coords = coords, 
       output = OH.OutputInfo( output_dir, distr_name = "WW_muminus"), 
-      cuts = "(decay_to_mu == 1) && (l_charge == -1)")
+      cuts = "(decay_to_mu == 1) && (l_charge == -1)",
+      syst = SSO.SystematicsOptions(use_muon_acc=True))
     create_WW_output(
       input = input, coords = coords, 
       output = OH.OutputInfo( output_dir, distr_name = "WW_muplus"), 
-      cuts = "(decay_to_mu == 1) && (l_charge == +1)")
+      cuts = "(decay_to_mu == 1) && (l_charge == +1)",
+      syst = SSO.SystematicsOptions(use_muon_acc=True))
     create_WW_output(
       input = input, coords = coords, 
       output = OH.OutputInfo( output_dir, distr_name = "WW_tauminus"), 
