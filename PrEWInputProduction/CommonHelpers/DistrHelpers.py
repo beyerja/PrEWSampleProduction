@@ -209,3 +209,65 @@ def get_hist_ptr(rdf, distr_name, coords):
     return hist_ptr
 
 # ------------------------------------------------------------------------------
+
+def get_bin_range_1d(hist):
+    """ Return correct index range for 1D histogram. """
+    bin_range = []
+    for x_bin in range(0, hist.GetNbinsX()+2):
+          bin = hist.GetBin(x_bin)
+              
+          # Skip overflow and underflow bins
+          if hist.IsBinUnderflow(bin) or hist.IsBinOverflow(bin): 
+              continue
+          
+          bin_range.append(bin)
+    return bin_range
+          
+    
+def get_bin_range_2d(hist):
+    """ Return correct index range for 2D histogram. """
+    bin_range = []
+    for x_bin in range(0, hist.GetNbinsX()+2):
+        for y_bin in range(0, hist.GetNbinsY()+2):
+            bin = hist.GetBin(x_bin, y_bin)
+            
+            # Skip overflow and underflow bins
+            if hist.IsBinUnderflow(bin) or hist.IsBinOverflow(bin): 
+                continue
+
+            bin_range.append(bin)
+    return bin_range
+
+
+def get_bin_range_3d(hist):
+    """ Return correct index range for 3D histogram. """
+    bin_range = []
+    for x_bin in range(0, hist.GetNbinsX()+2):
+        for y_bin in range(0, hist.GetNbinsY()+2):
+            for z_bin in range(0, hist.GetNbinsZ()+2):
+                bin = hist.GetBin(x_bin, y_bin, z_bin)
+                
+                # Skip overflow and underflow bins
+                if hist.IsBinUnderflow(bin) or hist.IsBinOverflow(bin): 
+                    continue
+
+                bin_range.append(bin)
+    return bin_range
+
+def get_bin_range(hist):
+    """ Return the bin index range that corresponds to the way the bin 
+        coordinates where extracted from the histogram.
+    """
+    bin_range = []
+    dim = hist.GetDimension()
+    if (dim == 1):
+        bin_range = get_bin_range_1d(hist)
+    elif (dim == 2):
+        bin_range = get_bin_range_2d(hist)
+    elif (dim == 3):
+        bin_range = get_bin_range_3d(hist)
+    else:
+        raise ValueError("Invalid hist dimension: {}".format(dim))
+    return bin_range
+
+# ------------------------------------------------------------------------------
