@@ -75,7 +75,7 @@ class RKCoefMatcher:
         
         # Find the coefficients for each bin
         bin_range = range(len(distr_data["Cross sections"]))
-        for b in tqdm(bin_range, desc="\tMatching coefs for {} e-:{} e+:{}".format(distr_name, eM_chirality, eP_chirality)):
+        for b in tqdm(bin_range, desc="\tMatching RK coefs"):
             # Get the (adjusted coordinates) of
             coords = [distr_data["BinCenters:{}".format(coord_name)][b] for coord_name in self.RK_binning[RK_name]]
             
