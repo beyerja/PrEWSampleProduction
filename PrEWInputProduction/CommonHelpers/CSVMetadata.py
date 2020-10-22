@@ -23,7 +23,7 @@ class CSVMetadata:
             raise ValueError(
                 "Unknown attribute {}, only know {}.", self.marker_map[name], self.marker_map.keys())
         else:
-            self.metadata[name] = value
+            self.metadata[self.marker_map[name]] = value
             
     def add_coef(self, base_name, coef_name, value):
         """ Add a global coefficient as metadata.
