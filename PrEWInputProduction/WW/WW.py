@@ -12,6 +12,8 @@ import DistrHelpers as DH
 import InputHelpers as IH
 import OutputHelpers as OH
 import RKCoefMatcher as RKCM
+sys.path.append("../Cuts")
+import MuonAcceptance as CMA
 
 # ------------------------------------------------------------------------------
 
@@ -39,6 +41,11 @@ def create_WW_output(input, output, coords, cuts):
     eP_chi = eP_chi_ptr.GetValue()
     n_after_cuts = n_after_cuts_ptr.GetValue()
     th3 = th3_ptr.GetValue()
+
+    # Prepare the muon acceptance box
+    muon_acc_cut = CMA.default_acc_cut()
+    muon_acc = CMA.MuonAccParametrisation(rdf_after_cuts, muon_acc_cut, 0.001, 
+                                          "costh_l", output.distr_name, coords)
 
     print("For distr {}:\n\tBefore cuts: {} , after cuts: {} ({}%)".format(
         output.distr_name, n_total, n_after_cuts, n_after_cuts/n_total*100.0))
@@ -71,6 +78,9 @@ def create_WW_output(input, output, coords, cuts):
     coef_matcher = RKCM.default_coef_matcher()
     data = coef_matcher.add_coefs_to_data(output.distr_name, eM_chi, eP_chi, data)
     
+    # Try extracting the differential coefficients for the muon acceptance box
+    data = muon_acc.add_coefs_to_data(data)
+    
     # Create a pandas dataframe
     df = pd.DataFrame(data)
 
@@ -84,6 +94,7 @@ def create_WW_output(input, output, coords, cuts):
     metadata.add("energy", input.energy)
     metadata.add("e- chirality", eM_chi)
     metadata.add("e+ chirality", eP_chi)
+    muon_acc.add_coefs_to_metadata(metadata)
     metadata.write(file_path)
 
 # ------------------------------------------------------------------------------
