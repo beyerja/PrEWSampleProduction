@@ -47,6 +47,7 @@ def get_coef_data(hist_nocut, hist_0, hist_c, hist_2c, hist_w, hist_2w, hist_cw,
   
   # Doing this in loop instead of with TH1-operators to control each case
   bin_range = DH.get_bin_range(hist_nocut)
+  insufficient_MC_bins = 0 # Count the number of bins w/ insufficient MC
   for bin in tqdm(bin_range, desc="\tCalculate muon acc. coefs"):
     # Skip overflow and underflow bins
     if hist_nocut.IsBinUnderflow(bin) or hist_nocut.IsBinOverflow(bin): 
@@ -58,6 +59,7 @@ def get_coef_data(hist_nocut, hist_0, hist_c, hist_2c, hist_w, hist_2w, hist_cw,
       k_0.append(1.0) # Constant term 1, all other 0
       for k in [k_c, k_w, k_c2, k_w2, k_cw]:
         k.append(0.0)
+      insufficient_MC_bins += 1
       continue 
     
     R_0 = float(hist_0.GetBinContent(bin)) / N_nocut
@@ -74,6 +76,9 @@ def get_coef_data(hist_nocut, hist_0, hist_c, hist_2c, hist_w, hist_2w, hist_cw,
     k_c2.append( 1.0/delta**2 * (0.5*R_0 - R_c + 0.5*R_2c) )
     k_w2.append( 1.0/delta**2 * (0.5*R_0 - R_w + 0.5*R_2w) )
     k_cw.append( 1.0/delta**2 * (R_0 + R_cw - R_c - R_w) )
+
+  if (insufficient_MC_bins > 0):
+    print("Had to skip {} bins due to insufficient MC.".format(insufficient_MC_bins))
 
   return {"MuonAcc_k0": k_0, 
           "MuonAcc_kc": k_c, "MuonAcc_kw": k_w, 
