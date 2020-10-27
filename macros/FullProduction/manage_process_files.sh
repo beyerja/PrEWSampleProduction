@@ -107,7 +107,7 @@ tmp_steering_directory=${scripts_dir}/${tmp_base_name}
 
 # ------------------------------------------------------------------------------
 # Determine output process-dependent output directories
-process_output_directory=${output_dir}/${process}
+process_output_directory=${output_base}/${process} # output_base from config
 tmp_output_directory=${process_output_directory}/tmp
 
 # ------------------------------------------------------------------------------
