@@ -7,8 +7,6 @@ script_path=false
 input_file=false
 output_file=false
 
---script-path=${tmp_steering_file} --input-file=${input} --output-file=${tmp_output_file}
-
 # ------------------------------------------------------------------------------
 # Read input
 for i in "$@"
@@ -58,13 +56,13 @@ replace_token() {
 if [ "$input_file" != false ]; then
   token=INPUT_FILE_TOKEN
   replacement=$input_file
-  replace_token()
+  replace_token
 fi
 
 if [ "$output_file" != false ]; then
   token=OUTPUT_FILE_TOKEN
   replacement=$output_file
-  replace_token()
+  replace_token
 fi
 
 # ------------------------------------------------------------------------------
