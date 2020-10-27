@@ -4,9 +4,10 @@ echo "#########################################################################"
 echo "### Loading needed software versions ####################################" 
 echo "#########################################################################"
 
-# Load up-to-date iLCSoft 
-ilcsoft_version="v02-02"
-ilcsoft_dir="/cvmfs/ilc.desy.de/sw/x86_64_gcc82_sl6/${ilcsoft_version}"
+# Load the config to determine the iLCSoft version
+dir="$( cd "$( dirname "${BASH_SOURCE[0]}"  )" && pwd  )" # this script
+config_dir="${dir}/../scripts/config"
+. ${config_dir}/software.config
 
 if [[ "${ILCSOFT}" == *"${ilcsoft_dir}"* ]]; then
   echo "iLCSoft version is already loaded."

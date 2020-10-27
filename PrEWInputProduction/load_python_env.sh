@@ -4,8 +4,10 @@ echo "#########################################################################"
 echo "### Loading needed software versions ####################################" 
 echo "#########################################################################"
 
-# Load a modern LCG version (a full view including ROOT and Python3)
-lcg_version=98python3
+# Load the config to determine the LCG view (including ROOT and Python3)
+dir="$( cd "$( dirname "${BASH_SOURCE[0]}"  )" && pwd  )" # this script
+config_dir="${dir}/../scripts/config"
+. ${config_dir}/software.config
 
 if [[ "${LCG_VERSION}" == "${lcg_version}" ]]; then 
   echo "LCG view already loaded."
