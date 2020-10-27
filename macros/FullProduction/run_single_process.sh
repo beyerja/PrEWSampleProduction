@@ -87,7 +87,7 @@ for e_pol in "${e_polarizations[@]}"; do
     condor_job_IDs=()
     
     # Get all steering files for process, then loop to create job for each file
-    steering_files=$( ./manage_process_files.sh --set-steeringfiles --process=${process} --e-Pol=${e_pol} --e+Pol=${p_pol} --input-config=${input_config} --output-config=${output_config} )
+    steering_files=$( ${dir}/manage_process_files.sh --set-steeringfiles --process=${process} --e-Pol=${e_pol} --e+Pol=${p_pol} --input-config=${input_config} --output-config=${output_config} )
     
     if [[ $steering_files == "" ]]; then
       echo "No files found for process ${process} ${e_pol} ${p_pol}."
@@ -119,8 +119,8 @@ for e_pol in "${e_polarizations[@]}"; do
     echo "Jobs of ${process} ${e_pol} ${p_pol} finished!"
     
     echo "Combine individual files of ${process} ${e_pol} ${p_pol} and clean up temporary stuff."
-    ./manage_process_files.sh --combine-output --process=${process} --e-Pol=${e_pol} --e+Pol=${p_pol} --input-config=${input_config} --output-config=${output_config}
-    ./manage_process_files.sh --clean-up --process=${process} --e-Pol=${e_pol} --e+Pol=${p_pol} --input-config=${input_config} --output-config=${output_config}
+    ${dir}/manage_process_files.sh --combine-output --process=${process} --e-Pol=${e_pol} --e+Pol=${p_pol} --input-config=${input_config} --output-config=${output_config}
+    ${dir}/manage_process_files.sh --clean-up --process=${process} --e-Pol=${e_pol} --e+Pol=${p_pol} --input-config=${input_config} --output-config=${output_config}
     
     echo "Done with ${process} ${e_pol} ${p_pol}!"
     } &
