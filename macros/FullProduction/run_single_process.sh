@@ -106,6 +106,9 @@ for e_pol in "${e_polarizations[@]}"; do
       # Split output up by spaces and only read last part (which is cluster ID).
       # Details at: https://stackoverflow.com/questions/3162385/how-to-split-a-string-in-shell-and-get-the-last-field
       condor_job_IDs+="${condor_job_output##* } "
+      
+      # Wait a little to not overload the condor scheduler
+      sleep 0.05s
     done
     cd ${dir}
     
