@@ -5,9 +5,7 @@ executable          = run.sh
 transfer_executable = True
 universe            = vanilla
 
-# To be given when called: logging directory
-log_dir = .
-
+# log_dir to be given when called
 output              = $(log_dir)/$(Cluster).$(Process).out
 error               = $(log_dir)/$(Cluster).$(Process).error
 log                 = $(log_dir)/$(Cluster).$(Process).log
