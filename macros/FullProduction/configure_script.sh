@@ -47,7 +47,7 @@ fi
 # line of the token with the given replacement
 
 replace_token() {
-  sed -i "s/${token}/${replacement}/g" ${script_path}
+  sed -i "s|${token}|${replacement}|g" ${script_path}
 }
 
 # ------------------------------------------------------------------------------
