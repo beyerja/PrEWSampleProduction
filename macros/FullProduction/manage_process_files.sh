@@ -110,6 +110,10 @@ tmp_steering_directory=${scripts_dir}/${tmp_base_name}
 process_output_directory=${output_base}/${process} # output_base from config
 tmp_output_directory=${process_output_directory}/tmp
 
+if [[ ! -d ${tmp_output_directory} ]] ; then # Create if not existing
+  mkdir -p ${tmp_output_directory}
+fi
+
 # ------------------------------------------------------------------------------
 # Perform the requested action
 
