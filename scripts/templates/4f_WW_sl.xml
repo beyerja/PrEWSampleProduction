@@ -24,7 +24,7 @@
   <!-- Your processor configuration here after -->
   <processor name="MyWWProcessor" type="WWProcessor">
     <!-- The MC particle collection name -->
-    <parameter name="MCParticleCollection" lcioInType="MCParticle"> MCParticlesSkimmed </parameter>
+    <parameter name="MCParticleCollection" lcioInType="MCParticle"> MCParticle </parameter>
     <parameter name="OutputFilePath"> 
       OUTPUT_FILE_TOKEN
     </parameter>
