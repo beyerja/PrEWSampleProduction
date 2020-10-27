@@ -1,0 +1,33 @@
+<marlin>
+  
+  <execute>
+    <!-- List the processors to execute here ! -->
+    <processor name="MyWWProcessor" />
+  </execute>
+  
+  <global>
+    <!-- Change the input file here or by command line -->
+    <parameter name="LCIOInputFiles"> 
+      INPUT_FILE_TOKEN
+    </parameter>
+    <!-- The maximum number of events + runs to process -->
+    <parameter name="MaxRecordNumber" value="0"/>
+    <!-- The number of events to skip on start -->
+    <parameter name="SkipNEvents" value="0"/>
+    <parameter name="SupressCheck" value="false"/>
+    <!-- Global verbosity -->
+    <parameter name="Verbosity" options="DEBUG0-4,MESSAGE0-4,WARNING0-4,ERROR0-4,SILENT"> MESSAGE </parameter>
+    <!-- A user random seed -->
+    <parameter name="RandomSeed" value="1234567890" />
+  </global>
+  
+  <!-- Your processor configuration here after -->
+  <processor name="MyWWProcessor" type="WWProcessor">
+    <!-- The MC particle collection name -->
+    <parameter name="MCParticleCollection" lcioInType="MCParticle"> MCParticle </parameter>
+    <parameter name="OutputFilePath"> 
+      OUTPUT_FILE_TOKEN
+    </parameter>
+  </processor>
+  
+</marlin>
