@@ -66,8 +66,10 @@ fi
 
 # ------------------------------------------------------------------------------
 # Load the software environment and processors
-. ${dir}/../load_env.sh
-. ${dir}/../add_processors.sh
+original_dir=${dir} # Need to be careful here, the macros also use the `dir` var
+. ${original_dir}/../load_env.sh
+. ${original_dir}/../add_processors.sh
+dir=${original_dir}
 
 # ------------------------------------------------------------------------------
 # Arrays with possible polarizations for looping
