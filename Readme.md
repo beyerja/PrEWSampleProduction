@@ -33,6 +33,7 @@ They use the configuration provided in `scripts/config`.
 
 The `run_single_process.sh` script starts the production for a single process.
 ```shell
+chmod u+x ./macros/*/*.sh 
 ./macros/FullProduction/run_single_process.sh --process=4f_WW_sl --input-config=$(pwd)/scripts/config/input_250.config --output-config=$(pwd)/scripts/config/output_250.config
 ```
 
