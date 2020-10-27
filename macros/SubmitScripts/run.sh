@@ -4,7 +4,7 @@
 # Purpose: This script can easily be given to HTCondor with any command
 
 if ! [[ $# > 0 ]]; then 
-  echo "usage: ./run.sh command [arguments]"
+  echo "usage: ./run.sh bash_command"
   exit
 fi
 

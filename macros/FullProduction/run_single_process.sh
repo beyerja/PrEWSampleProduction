@@ -65,13 +65,6 @@ if [[ ! -d ${condor_output_dir} ]] ; then # Create if not existing
 fi
 
 # ------------------------------------------------------------------------------
-# Load the software environment and processors
-original_dir=${dir} # Need to be careful here, the macros also use the `dir` var
-. ${original_dir}/../load_env.sh
-. ${original_dir}/../add_processors.sh
-dir=${original_dir}
-
-# ------------------------------------------------------------------------------
 # Arrays with possible polarizations for looping
 e_polarizations=("eL" "eR")
 p_polarizations=("pL" "pR")
@@ -102,9 +95,13 @@ for e_pol in "${e_polarizations[@]}"; do
     cd ${condor_directory}
     
     for steering_file in ${steering_files[@]}; do
+      # The command to be executed: 
+      # Load the needed software and start the Marlin run
+      command_string="cd ${dir}/.. && . load_env.sh && . add_processors.sh && Marlin ${steering_file}"
+      
       # Submit job to HTCondor using standard submitting setup
       # -> Start Marlin job and keep track of job ID to know when it's done
-      condor_job_output=$(condor_submit ${submit_script} log_dir=${condor_output_dir} arguments="Marlin ${steering_file}")
+      condor_job_output=$(condor_submit ${submit_script} log_dir=${condor_output_dir} arguments="${command_string}")
       
       # Split output up by spaces and only read last part (which is cluster ID).
       # Details at: https://stackoverflow.com/questions/3162385/how-to-split-a-string-in-shell-and-get-the-last-field
