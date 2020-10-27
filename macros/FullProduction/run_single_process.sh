@@ -66,8 +66,8 @@ fi
 
 # ------------------------------------------------------------------------------
 # Load the software environment and processors
-. ${dir}/load_env.sh
-. ${dir}/add_processors.sh
+. ${dir}/../load_env.sh
+. ${dir}/../add_processors.sh
 
 # ------------------------------------------------------------------------------
 # Arrays with possible polarizations for looping
