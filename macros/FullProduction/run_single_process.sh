@@ -97,7 +97,7 @@ for e_pol in "${e_polarizations[@]}"; do
     for steering_file in ${steering_files[@]}; do
       # The command to be executed: 
       # Load the needed software and start the Marlin run
-      command_string="cd ${dir}/.. && . load_env.sh && . add_processors.sh && Marlin ${steering_file}"
+      command_string="cd ${dir}/.. \&\& . load_env.sh \&\& . add_processors.sh \&\& Marlin ${steering_file}"
       
       # Submit job to HTCondor using standard submitting setup
       # -> Start Marlin job and keep track of job ID to know when it's done
