@@ -19,7 +19,7 @@ import SystematicsOptions as SSO
 def main():
     """ Run the WW code for different cases.
     """
-    log.basicConfig(level=log.DEBUG) # Set logging level
+    log.basicConfig(level=log.WARNING) # Set logging level
     ROOT.EnableImplicitMT() # Enable multithreading in RDataFrame
 
     # Input

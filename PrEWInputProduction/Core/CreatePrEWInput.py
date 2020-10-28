@@ -5,6 +5,7 @@
 
 # ------------------------------------------------------------------------------
 
+import logging as log
 import ROOT
 import pandas as pd
 import sys
@@ -31,6 +32,9 @@ def create_PrEW_input(input, output, coords, cuts,
   """
   
   # ----------------------- Create RDF and set commands ------------------------
+  log.debug("Setting up RDataFrame instructions for {}".format(
+      output.distr_name))
+  
   # Read in the tree
   rdf = input.get_rdf()
   
@@ -55,6 +59,8 @@ def create_PrEW_input(input, output, coords, cuts,
                                           "costh_l", output.distr_name, coords)
 
   # ----------------------- Trigger RDF operations -----------------------------
+  log.debug("Triggering RDataFrame operations.")
+  
   # Get all the requested values
   n_total = n_total_ptr.GetValue()
   cross_section = cross_section_ptr.GetValue()
@@ -76,9 +82,11 @@ def create_PrEW_input(input, output, coords, cuts,
 
   # Plot the histogram if requested
   if (output.create_plots):
+    log.debug("Create histogram plot.")
     DP.draw_hist(hist, output, output_base_name)
 
   # ----------------------- Producing PrEW input -------------------------------
+  log.debug("Start producing PrEW input.")
 
   # Extract bin centers and cross sections from the histogram
   data = DH.get_data(hist, coords)
@@ -109,5 +117,6 @@ def create_PrEW_input(input, output, coords, cuts,
     muon_acc.add_coefs_to_metadata(metadata)
 
   metadata.write(file_path)
+  log.debug("Done with distribution.")
 
 # ------------------------------------------------------------------------------
