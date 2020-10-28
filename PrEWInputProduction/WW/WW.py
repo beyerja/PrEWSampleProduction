@@ -36,6 +36,14 @@ def create_WW_output(input, output, coords, cuts, syst=SSO.SystematicsOptions())
     # Create a RDataFrame histogram result pointer
     th3_ptr = DH.get_hist_ptr(rdf_after_cuts, output.distr_name, coords)
 
+    # Prepare the muon acceptance box
+    muon_acc = None
+    if syst.use_muon_acc:
+      muon_acc_cut = SMA.default_acc_cut()
+      muon_acc = SMA.MuonAccParametrisation(rdf_after_cuts, muon_acc_cut, 0.001, 
+                                            "costh_l", output.distr_name, 
+                                            coords)
+
     # ----------------------- Trigger RDF operations ---------------------------
     # Get all the requested values
     n_total = n_total_ptr.GetValue()
@@ -44,14 +52,6 @@ def create_WW_output(input, output, coords, cuts, syst=SSO.SystematicsOptions())
     eP_chi = eP_chi_ptr.GetValue()
     n_after_cuts = n_after_cuts_ptr.GetValue()
     th3 = th3_ptr.GetValue()
-
-    # Prepare the muon acceptance box
-    muon_acc = None
-    if syst.use_muon_acc:
-      muon_acc_cut = SMA.default_acc_cut()
-      muon_acc = SMA.MuonAccParametrisation(rdf_after_cuts, muon_acc_cut, 0.001, 
-                                            "costh_l", output.distr_name, 
-                                            coords)
 
     print("For distr {}:\n\tBefore cuts: {} , after cuts: {} ({}%)".format(
         output.distr_name, n_total, n_after_cuts, n_after_cuts/n_total*100.0))
@@ -82,7 +82,8 @@ def create_WW_output(input, output, coords, cuts, syst=SSO.SystematicsOptions())
     
     # Try to find coefficients from RK distribution
     coef_matcher = RKCM.default_coef_matcher()
-    data = coef_matcher.add_coefs_to_data(output.distr_name, eM_chi, eP_chi, data)
+    data = coef_matcher.add_coefs_to_data(output.distr_name, eM_chi, eP_chi, 
+                                          data)
     
     # Try extracting the differential coefficients for the muon acceptance box
     if muon_acc is not None:
