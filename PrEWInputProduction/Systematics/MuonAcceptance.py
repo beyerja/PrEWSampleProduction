@@ -1,7 +1,9 @@
-import DistrHelpers as DH
-
 import ROOT
+import sys
 from tqdm import tqdm
+
+sys.path.append("../ROOTHelp")
+import DistrHelpers as DH
 
 # ------------------------------------------------------------------------------
 

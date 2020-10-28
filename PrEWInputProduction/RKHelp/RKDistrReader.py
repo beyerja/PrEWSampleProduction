@@ -96,7 +96,6 @@ def test():
     """ Test the RKDistr and RKDistrReader classes.
     """
     reader = RKDistrReader(
-        # "/afs/desy.de/group/flc/pool/beyerjac/TGCAnalysis/GlobalFit/UnifiedApproach/MinimizationProcessFiles/ROOTfiles/MinimizationProcessesListFile_500_250Full_Elektroweak_menu_2018_04_03.root",
         "/nfs/dust/ilc/group/ild/beyerjac/TGCAnalysis/SampleProduction/WW_charge_separated/distributions/combined/Distribution_250GeV_WW_semilep_AntiMuNu.root",
         "MinimizationProcesses250GeV"
     )

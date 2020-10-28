@@ -1,4 +1,5 @@
 import ROOT
+import logging as log
 
 # ------------------------------------------------------------------------------
 
@@ -40,9 +41,9 @@ def get_data_1d(root_hist, coords):
         bin_values.append(value)
     
     # Store the data in a dictionary for pandas
-    data = { "BinCenters:{}".format(coords[0].name): bin_dims[d]["Centers"],
-             "BinLow:{}".format(coords[0].name): bin_dims[d]["LowerEdges"],
-             "BinUp:{}".format(coords[0].name): bin_dims[d]["UpperEdges"],
+    data = { "BinCenters:{}".format(coords[0].name): bins_x["Centers"],
+             "BinLow:{}".format(coords[0].name): bins_x["LowerEdges"],
+             "BinUp:{}".format(coords[0].name): bins_x["UpperEdges"],
              "Cross sections": bin_values }
     
     return data
@@ -132,6 +133,7 @@ def get_data(root_hist, coords):
     """
     dim = root_hist.GetDimension()
     data = 0
+    log.debug("Data is {}-dimensional.".format(dim))
 
     # Exact extraction depends on dimensionality
     if (dim == 1):

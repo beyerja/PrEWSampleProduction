@@ -125,9 +125,9 @@ def default_coef_matcher():
     """ Get the default coef matcher that looks in all known RK distributions (at 250 GeV!!!).
     """
     matcher = RKCoefMatcher()
-    matcher.add_RK_file("/home/jakob/Documents/DESY/MountPoints/POOLMount/TGCAnalysis/GlobalFit/UnifiedApproach/MinimizationProcessFiles/ROOTfiles/MinimizationProcessesListFile_500_250Full_Elektroweak_menu_2018_04_03.root", "MinimizationProcesses250GeV")
-    matcher.add_RK_file("/home/jakob/Documents/DESY/MountPoints/DUSTMount/TGCAnalysis/SampleProduction/WW_charge_separated/distributions/combined/Distribution_250GeV_WW_semilep_AntiMuNu.root", "MinimizationProcesses250GeV")
-    matcher.add_RK_file("/home/jakob/Documents/DESY/MountPoints/DUSTMount/TGCAnalysis/SampleProduction/WW_charge_separated/distributions/combined/Distribution_250GeV_WW_semilep_MuAntiNu.root", "MinimizationProcesses250GeV")
+    matcher.add_RK_file("/afs/desy.de/group/flc/pool/beyerjac/TGCAnalysis/GlobalFit/UnifiedApproach/MinimizationProcessFiles/ROOTfiles/MinimizationProcessesListFile_500_250Full_Elektroweak_menu_2018_04_03.root", "MinimizationProcesses250GeV")
+    matcher.add_RK_file("/nfs/dust/ilc/group/ild/beyerjac/TGCAnalysis/SampleProduction/WW_charge_separated/distributions/combined/Distribution_250GeV_WW_semilep_AntiMuNu.root", "MinimizationProcesses250GeV")
+    matcher.add_RK_file("/nfs/dust/ilc/group/ild/beyerjac/TGCAnalysis/SampleProduction/WW_charge_separated/distributions/combined/Distribution_250GeV_WW_semilep_MuAntiNu.root", "MinimizationProcesses250GeV")
     return matcher
 
 # ------------------------------------------------------------------------------
