@@ -1,4 +1,8 @@
 import ROOT
+import sys
+
+sys.path.append("../IO")
+import OutputHelpers as OH
 
 # ------------------------------------------------------------------------------
 
@@ -24,8 +28,12 @@ def draw_hist(hist, output, hist_name, extensions=["pdf","root"]):
     
     hist.Draw(draw_opt)
 
+    # Create the plot subdirectory
+    plot_subdir = "{}/plots".format(output.dir)
+    OH.create_dir(plot_subdir)
+    
     # Save the histogram
-    plot_output_base = "{}/plots/{}".format(output.dir, hist_name)
+    plot_output_base = "{}/plots/{}".format(plot_subdir, hist_name)
     for extension in extensions:
       canvas.Print("{}.{}".format(plot_output_base, extension))
 
