@@ -23,14 +23,16 @@ def main():
     ROOT.EnableImplicitMT() # Enable multithreading in RDataFrame
 
     # Input
-    input = IH.InputInfo(
-        # file_path = "/home/jakob/Documents/DESY/MountPoints/DUSTMount/TGCAnalysis/SampleProduction/NewMCProduction/Test/WWtest.root",
-        file_path = "/nfs/dust/ilc/group/ild/beyerjac/TGCAnalysis/SampleProduction/NewMCProduction/Test/WWtest.root",
-        tree_name = "WWObservables", energy = 250)
+    tree_name = "WWObservables"
+    energy = 250
+    path_LR = "/nfs/dust/ilc/group/ild/beyerjac/TGCAnalysis/SampleProduction/NewMCProduction/4f_WW_sl/4f_WW_sl_eL_pR.root"
+    path_RL = "/nfs/dust/ilc/group/ild/beyerjac/TGCAnalysis/SampleProduction/NewMCProduction/4f_WW_sl/4f_WW_sl_eR_pL.root"
+    input_LR = IH.InputInfo(path_LR, tree_name, energy)
+    input_RL = IH.InputInfo(path_RL, tree_name, energy)
+    inputs = [input_LR, input_RL]
 
     # Output settings
-    # output_dir = "/home/jakob/Documents/DESY/MountPoints/DUSTMount/TGCAnalysis/SampleProduction/NewMCProduction/WW"
-    output_dir = "/nfs/dust/ilc/group/ild/beyerjac/TGCAnalysis/SampleProduction/NewMCProduction/WW"
+    output_dir = "/nfs/dust/ilc/group/ild/beyerjac/TGCAnalysis/SampleProduction/NewMCProduction/4f_WW_sl/PrEWInput"
 
     # Coordinates
     coords = [
@@ -40,24 +42,25 @@ def main():
     ]
 
     # Create all WW distributions
-    CPI.create_PrEW_input(
-      input = input, coords = coords, 
-      output = OH.OutputInfo( output_dir, distr_name = "WW_muminus"), 
-      cuts = "(decay_to_mu == 1) && (l_charge == -1)",
-      syst = SSO.SystematicsOptions(use_muon_acc=True))
-    CPI.create_PrEW_input(
-      input = input, coords = coords, 
-      output = OH.OutputInfo( output_dir, distr_name = "WW_muplus"), 
-      cuts = "(decay_to_mu == 1) && (l_charge == +1)",
-      syst = SSO.SystematicsOptions(use_muon_acc=True))
-    CPI.create_PrEW_input(
-      input = input, coords = coords, 
-      output = OH.OutputInfo( output_dir, distr_name = "WW_tauminus"), 
-      cuts = "(decay_to_tau == 1) && (l_charge == -1)")
-    CPI.create_PrEW_input(
-      input = input, coords = coords, 
-      output = OH.OutputInfo( output_dir, distr_name = "WW_tauplus"), 
-      cuts = "(decay_to_tau == 1) && (l_charge == +1)")
+    for input in inputs:
+      CPI.create_PrEW_input(
+        input = input, coords = coords, 
+        output = OH.OutputInfo( output_dir, distr_name = "WW_muminus", create_plots = False), 
+        cuts = "(decay_to_mu == 1) && (l_charge == -1)",
+        syst = SSO.SystematicsOptions(use_muon_acc=True))
+      CPI.create_PrEW_input(
+        input = input, coords = coords, 
+        output = OH.OutputInfo( output_dir, distr_name = "WW_muplus", create_plots = False), 
+        cuts = "(decay_to_mu == 1) && (l_charge == +1)",
+        syst = SSO.SystematicsOptions(use_muon_acc=True))
+      CPI.create_PrEW_input(
+        input = input, coords = coords, 
+        output = OH.OutputInfo( output_dir, distr_name = "WW_tauminus", create_plots = False), 
+        cuts = "(decay_to_tau == 1) && (l_charge == -1)")
+      CPI.create_PrEW_input(
+        input = input, coords = coords, 
+        output = OH.OutputInfo( output_dir, distr_name = "WW_tauplus", create_plots = False), 
+        cuts = "(decay_to_tau == 1) && (l_charge == +1)")
 
     print("Done.")
 
