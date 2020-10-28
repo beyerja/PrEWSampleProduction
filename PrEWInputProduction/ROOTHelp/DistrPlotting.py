@@ -13,7 +13,7 @@ import OutputHelpers as OH
 
 def draw_hist(hist, output, hist_name, extensions=["pdf","root"]):
     # Draw the histogram
-    canvas = ROOT.TCanvas("c_{}".format(output.distr_name))
+    canvas = ROOT.TCanvas("c_{}".format(hist_name))
     canvas.cd()
     
     # Draw option dependent on dimensionality
