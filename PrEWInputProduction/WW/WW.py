@@ -33,6 +33,7 @@ def main():
 
     # Output settings
     output_dir = "/nfs/dust/ilc/group/ild/beyerjac/TGCAnalysis/SampleProduction/NewMCProduction/4f_WW_sl/PrEWInput"
+    create_plots = True
 
     # Coordinates
     coords = [
@@ -45,21 +46,21 @@ def main():
     for input in inputs:
       CPI.create_PrEW_input(
         input = input, coords = coords, 
-        output = OH.OutputInfo( output_dir, distr_name = "WW_muminus", create_plots = False), 
+        output = OH.OutputInfo( output_dir, distr_name = "WW_muminus", create_plots = create_plots), 
         cuts = "(decay_to_mu == 1) && (l_charge == -1)",
         syst = SSO.SystematicsOptions(use_muon_acc=True))
       CPI.create_PrEW_input(
         input = input, coords = coords, 
-        output = OH.OutputInfo( output_dir, distr_name = "WW_muplus", create_plots = False), 
+        output = OH.OutputInfo( output_dir, distr_name = "WW_muplus", create_plots = create_plots), 
         cuts = "(decay_to_mu == 1) && (l_charge == +1)",
         syst = SSO.SystematicsOptions(use_muon_acc=True))
       CPI.create_PrEW_input(
         input = input, coords = coords, 
-        output = OH.OutputInfo( output_dir, distr_name = "WW_tauminus", create_plots = False), 
+        output = OH.OutputInfo( output_dir, distr_name = "WW_tauminus", create_plots = create_plots), 
         cuts = "(decay_to_tau == 1) && (l_charge == -1)")
       CPI.create_PrEW_input(
         input = input, coords = coords, 
-        output = OH.OutputInfo( output_dir, distr_name = "WW_tauplus", create_plots = False), 
+        output = OH.OutputInfo( output_dir, distr_name = "WW_tauplus", create_plots = create_plots), 
         cuts = "(decay_to_tau == 1) && (l_charge == +1)")
 
     print("Done.")
