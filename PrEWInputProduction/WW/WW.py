@@ -6,12 +6,14 @@ import os
 import sys
 
 # Local modules
-sys.path.append("../CommonHelpers")
+sys.path.append("../IO")
 import CSVMetadata as CSVM
-import DistrHelpers as DH
 import InputHelpers as IH
 import OutputHelpers as OH
+sys.path.append("../RKHelp")
 import RKCoefMatcher as RKCM
+sys.path.append("../ROOTHelp")
+import DistrHelpers as DH
 sys.path.append("../Systematics")
 import MuonAcceptance as SMA
 import SystematicsOptions as SSO
