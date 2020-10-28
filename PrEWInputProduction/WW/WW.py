@@ -21,6 +21,7 @@ def main():
     """
     log.basicConfig(level=log.WARNING) # Set logging level
     ROOT.EnableImplicitMT() # Enable multithreading in RDataFrame
+    ROOT.gROOT.SetBatch(True) # Don't show graphics at runtime
 
     # Input
     tree_name = "WWObservables"
