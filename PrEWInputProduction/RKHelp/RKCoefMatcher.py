@@ -101,13 +101,13 @@ class RKCoefMatcher:
             for co in range(len(RK_distr.coef_labels)):
                 coef = None
                 if (eM_chirality == -1) and (eP_chirality == +1):
-                    coef = RK_distr.coefs_LR[b_RK][co]
+                    coef = RK_distr.coefs_LR[index][co]
                 elif (eM_chirality == +1) and (eP_chirality == -1):
-                    coef = RK_distr.coefs_RL[b_RK][co]
+                    coef = RK_distr.coefs_RL[index][co]
                 elif (eM_chirality == -1) and (eP_chirality == -1):
-                    coef = RK_distr.coefs_LL[b_RK][co]
+                    coef = RK_distr.coefs_LL[index][co]
                 elif (eM_chirality == +1) and (eP_chirality == +1):
-                    coef = RK_distr.coefs_RR[b_RK][co]
+                    coef = RK_distr.coefs_RR[index][co]
                 else:
                     raise ValueError("Unknown chiralities {} {}".format(eM_chirality, eP_chirality))
                     
