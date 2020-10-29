@@ -25,8 +25,8 @@ class RKCoefMatcher:
     # Sometimes binning is different (without affecting the cross section)
     RK_bin_manipulator = {
       # Roberts WW distribution have a wrong Phi_l^* binning
-      "WW_semilep_MuAntiNu" : lambda x: np.array([x[0], x[1], (x[2] - np.pi) * 9.0/10.0]),
-      "WW_semilep_AntiMuNu" : lambda x: np.array([x[0], x[1], (x[2] - np.pi) * 9.0/10.0])
+      "WW_semilep_MuAntiNu" : lambda x: np.array([x[0], -x[1], (x[2] - np.pi) * 9.0/10.0]),
+      "WW_semilep_AntiMuNu" : lambda x: np.array([x[0], -x[1], (x[2] - np.pi) * 9.0/10.0])
     }
     
     def __init__(self, RK_distrs=None):
