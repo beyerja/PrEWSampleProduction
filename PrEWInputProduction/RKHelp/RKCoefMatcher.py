@@ -1,4 +1,5 @@
 from copy import copy
+import logging as log
 import numpy as np
 from tqdm import tqdm
 
@@ -21,11 +22,11 @@ class RKCoefMatcher:
         "WW_semilep_AntiMuNu" : ["costh_Wminus_star","costh_l_star","phi_l_star"]
     }
     
-    # Sometimes binning is different without affecting coefficients
+    # Sometimes binning is different (without affecting the cross section)
     RK_bin_manipulator = {
-        # Roberts WW distribution have a wrong Phi_l^* binning
-        "WW_semilep_MuAntiNu" : [False, False, lambda x: (x - np.pi) * 9.0/10.0],
-        "WW_semilep_AntiMuNu" : [False, False, lambda x: (x - np.pi) * 9.0/10.0]
+      # Roberts WW distribution have a wrong Phi_l^* binning
+      "WW_semilep_MuAntiNu" : lambda x: np.array([x[0], x[1], (x[2] - np.pi) * 9.0/10.0]),
+      "WW_semilep_AntiMuNu" : lambda x: np.array([x[0], x[1], (x[2] - np.pi) * 9.0/10.0])
     }
     
     def __init__(self, RK_distrs=None):
@@ -58,20 +59,26 @@ class RKCoefMatcher:
             Needs the distribution data which contains the bins.
         """
         if not distr_name in self.MC_to_RK_names:
-            print("\tNo coefficients found for {}".format(distr_name))
-            return distr_data
+          log.debug("\tNo coefficients found for {}".format(distr_name))
+          return distr_data
+        else:
+          log.debug("Distribution available, will attemp matching.")
         
         RK_name = self.MC_to_RK_names[distr_name]
         RK_distr = self.get_distr(RK_name)
+        RK_coords = copy(RK_distr.bin_centers) # Copy RK bin center array
+          
+        # See if bins are supposed to be manipulated
+        bin_manipulator = False
+        if RK_name in self.RK_bin_manipulator:
+          log.debug("Got bin manipulator.")
+          bin_manipulator = self.RK_bin_manipulator[RK_name]
+          RK_coords = np.apply_along_axis(bin_manipulator, axis=1, arr=RK_coords)
         
         # Dictionary for collecting the coefficients in the right order
         coef_dict = {}
         for coef_label in RK_distr.coef_labels:
             coef_dict[coef_label] = []
-          
-        bin_manipulator = False
-        if RK_name in self.RK_bin_manipulator:
-            bin_manipulator = self.RK_bin_manipulator[RK_name]
         
         # Find the coefficients for each bin
         bin_range = range(len(distr_data["Cross sections"]))
@@ -81,21 +88,19 @@ class RKCoefMatcher:
             
             # Find the correct bin
             index = None
-            for b_RK in range(len(RK_distr.bin_centers)):
-                RK_coords = copy(RK_distr.bin_centers[b_RK])
-                # Correct RK coordinates if necessary
-                for c in range(len(RK_coords)):
-                    if bin_manipulator:
-                        if bin_manipulator[c]:
-                            RK_coords[c] = bin_manipulator[c](RK_coords[c])
-                            
-                # Check if coordinates match up
-                if np.all([abs(coords[c] - RK_coords[c]) < 0.001 for c in range(len(coords))]):
-                    index = b_RK
-                    break
+            diff = np.absolute( RK_coords - coords )
+            diff_check = np.all(diff < 0.001, axis=1) # Check which coordinates match up
+            indices = np.where(diff_check)[0]
             
-            if index == None:
-                raise ValueError("Didn't find matching bin {} \nAvailable bins : {}".format(coords,RK_distr.bin_centers))
+            # Check if exactly one index was found
+            if len(indices) == 0:
+              raise ValueError("Didn't find matching bin {} \nAvailable bins : {}".format(coords,RK_coords))
+            elif (len(indices) > 1):
+              raise ValueError("Found more than one fitting bin for {}: {}".format(coords,[RK_coords[i] for i in indices]))
+            else:
+              log.debug("Found index for bin {}.".format(b))
+              
+            index = indices[0]
             
             # Find and add the appropriate coefs from the RK distribution
             for co in range(len(RK_distr.coef_labels)):
