@@ -74,6 +74,9 @@ private:
 
   // --- Input parameters ------------------------------------------------------
   std::string m_mcCollectionName = {""};
+
+  bool m_unboost_xangle {true};
+
   std::string m_file_path{""};
   std::string m_tree_name{""};
 
@@ -82,9 +85,9 @@ private:
   // TFile and TTree with result output
   std::unique_ptr<TFile> m_file{};
   TTree *m_tree{}; // Needs to be pure pointer, belongs to file
-  
+
   // Output information
-  Utils::HeaderInfo m_header {};
+  Utils::HeaderInfo m_header{};
   WW::WWObservables m_observables{};
 
   // Internal functions

@@ -11,8 +11,11 @@ void WWProcessor::extract_ee_observables(const EVENT::MCParticle &Wminus) {
   auto Wminus_tlv_lab = Utils::MC::get_tlv(Wminus);
 
   // Lorentz vectors in e+e- frame (after removing crossing angle)
-  auto Wminus_tlv_ee = MarlinHelp::ILD::Machine::unboost_crossing_angle(
-      Wminus_tlv_lab, m_header.m_energy);
+  auto Wminus_tlv_ee = Wminus_tlv_lab;
+  if (m_unboost_xangle) {
+    Wminus_tlv_ee = MarlinHelp::ILD::Machine::unboost_crossing_angle(
+        Wminus_tlv_lab, m_header.m_energy);
+  }
 
   // --- Find observables ------------------------------------------------------
   m_observables.costh_Wminus_star = Wminus_tlv_ee.CosTheta();
