@@ -21,8 +21,6 @@ void WWProcessor::extract_Wl_observables(const EVENT::MCParticle &Wl,
   // Lorentz vectors in e+e- frame (after removing crossing angle)
   auto energy = m_header.m_energy;
   auto eM_tlv_ee = TLorentzVector(0, 0, energy, energy); // e- in z direction
-  auto l_tlv_ee = MarlinHelp::ILD::Machine::unboost_crossing_angle(
-      l_tlv_lab, m_header.m_energy);
   
   auto Wl_tlv_ee = Wl_tlv_lab;
   if (m_unboost_xangle) {
@@ -30,8 +28,9 @@ void WWProcessor::extract_Wl_observables(const EVENT::MCParticle &Wl,
         MarlinHelp::ILD::Machine::unboost_crossing_angle(Wl_tlv_lab, energy);
   }
 
-  // Boost into the W system (boosting e- not necessary, just less confusing)
-  auto l_tlv_Wl = MarlinHelp::Root::LorentzVec::boost_tlv(l_tlv_lab, Wl_tlv_ee);
+  // Lorentz vectors in W_l system
+  auto l_tlv_Wl =
+      MarlinHelp::Root::LorentzVec::boost_tlv(l_tlv_lab, Wl_tlv_lab);
 
   // Rotate to be along W flight direction (x in e-W plane)
   // (Previous boost was along W direction, so e-W plane didn't change)
