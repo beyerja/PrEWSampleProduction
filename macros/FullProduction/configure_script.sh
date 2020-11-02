@@ -6,6 +6,7 @@
 script_path=false
 input_file=false
 output_file=false
+unboost_crossing_angle=""
 
 # ------------------------------------------------------------------------------
 # Read input
@@ -24,8 +25,12 @@ case $i in
     output_file="${i#*=}"
     shift # past argument=value
   ;;
+  --unboost-crossing-angle=*)
+    unboost_crossing_angle="${i#*=}"
+    shift # past argument=value
+  ;;
   -h|--help)
-    echo "usage: ./configure_script.sh --script-path=[...] [--input-file=...] [--output-file=...]"
+    echo "usage: ./configure_script.sh --script-path=[...] [--input-file=...] [--output-file=...] [--unboost-crossing-angle=[true,false]]"
     shift # past argument=value
   ;;
   *)
@@ -63,6 +68,15 @@ if [ "$output_file" != false ]; then
   token=OUTPUT_FILE_TOKEN
   replacement=$output_file
   replace_token
+fi
+
+# Crossing angle token must be set either way
+if [ "$unboost_crossing_angle" != "" ]; then
+  token=UNBOOST_CROSSINGANGLE_TOKEN
+  replacement=$unboost_crossing_angle
+  replace_token
+else 
+  >&2 echo "Need to knew if crossing angle should be unboosted! Must be given in input config using unboost_crossing_angle variable."; exit 1
 fi
 
 # ------------------------------------------------------------------------------

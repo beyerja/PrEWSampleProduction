@@ -25,6 +25,9 @@
   <processor name="MyWWProcessor" type="WWProcessor">
     <!-- The MC particle collection name -->
     <parameter name="MCParticleCollection" lcioInType="MCParticle"> MCParticle </parameter>
+    <parameter name="UnboostCrossingAngle"> 
+      UNBOOST_CROSSINGANGLE_TOKEN
+    </parameter>
     <parameter name="OutputFilePath"> 
       OUTPUT_FILE_TOKEN
     </parameter>
