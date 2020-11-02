@@ -116,7 +116,14 @@ for e_pol in "${e_polarizations[@]}"; do
     echo "Waiting for jobs of ${process} ${e_pol} ${p_pol} to finish."
     for job_ID in ${condor_job_IDs[@]}; do
       job_log_path=$(ls ${condor_output_dir}/${job_ID}*.log)
-      wait_output=$(condor_wait ${job_log_path}) # Write into variable to suppress spammy output
+      
+      # Write into variable to suppress spammy output.
+      # Timeout after 15 seconds to restart command, else it gets stuck sometimes.
+      status=124 # Start with error code to get into loop
+      while [ $status -eq 124 ]; do
+        wait_output=$(timeout 15 condor_wait ${job_log_path}) 
+        status=$? # Update status -> 124 means timeout, else success
+      done
     done
     echo "Jobs of ${process} ${e_pol} ${p_pol} finished!"
     
