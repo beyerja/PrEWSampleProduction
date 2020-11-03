@@ -374,7 +374,7 @@ std::string MC::print(const EVENT::MCParticle &mcp) {
   return std::string("E: ") + std::to_string(mcp.getEnergy()) + 
         " Px: " + std::to_string(mcp.getMomentum()[0]) +
         " Py: " + std::to_string(mcp.getMomentum()[1]) +
-        " Pz: " + std::to_string(mcp.getMomentum()[2]);
+        " Pz: " + std::to_string(mcp.getMomentum()[2]) +
         " Charge: " + std::to_string(mcp.getCharge());
 }
 
