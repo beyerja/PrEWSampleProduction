@@ -10,8 +10,8 @@ void WWProcessor::extract_Wl_observables(const EVENT::MCParticle &Wl,
   /** Extract the lepton observables in the leptonically decaying W system.
       Need angles in W rest frame and with z' axis along W_l flight direction:
       1. Boost into e+e- system after ISR
-      2. Boost into W_l system
-      3. Rotate to be along W_l axis
+      2. Rotate to be along W_l axis
+      3. Boost into W_l system
       4. Extract angles
    **/
   // Lorentz vectors in lab frame
