@@ -10,6 +10,7 @@
 #include <EVENT/MCParticle.h>
 
 // Standard library
+#include <string>
 #include <vector>
 
 namespace Utils {
@@ -53,6 +54,10 @@ EVENT::MCParticle *incoming_eP_after_ISR(const EVENT::MCParticleVec &vec);
 // --- Create MCParticles ------------------------------------------------------
 IMPL::MCParticleImpl create_W(const EVENT::MCParticle &mcp1,
                            const EVENT::MCParticle &mcp2);
+// -----------------------------------------------------------------------------
+
+// --- Print out related -------------------------------------------------------
+std::string print(const EVENT::MCParticle &mcp);
 // -----------------------------------------------------------------------------
 
 } // namespace MC

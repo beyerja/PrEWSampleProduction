@@ -30,7 +30,11 @@ WWProcessor::WWProcessor() : marlin::Processor("WWProcessor") {
                           // file parsing
       std::string("MCParticle")); // That's the default value, in case
 
-  // Register a parameter
+  // Register input parameters
+  registerProcessorParameter("UnboostCrossingAngle",
+                             "Should the crossing angle be unboosted?",
+                             m_unboost_xangle, bool(true));
+
   registerProcessorParameter("OutputFilePath", "Path of the output ROOT file",
                              m_file_path, std::string("./output.root"));
   registerProcessorParameter("OutputTreeName", "Name of the output TTree",

@@ -141,7 +141,7 @@ if  [[ ${action} == "set" ]]; then
     fi
     
     cp ${template_path} ${tmp_steering_file}
-    ${dir}/configure_script.sh --script-path=${tmp_steering_file} --input-file=${file} --output-file=${tmp_output_file}
+    ${dir}/configure_script.sh --script-path=${tmp_steering_file} --input-file=${file} --output-file=${tmp_output_file} --unboost-crossing-angle=${unboost_crossing_angle}
     
     file_steering_paths+="${tmp_steering_file} " # Keep track of steering file for job starting
   done
