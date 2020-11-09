@@ -10,6 +10,8 @@ include_directories( include )
 aux_source_directory( src/Utils SRC_FILES )
 aux_source_directory( src/WW SRC_FILES )
 aux_source_directory( src/WW/Processor SRC_FILES )
+aux_source_directory( src/SingleW SRC_FILES )
+aux_source_directory( src/SingleW/Processor SRC_FILES )
 add_shared_library( ${PROJECT_NAME} ${SRC_FILES} )
 
 # Link external libraries
