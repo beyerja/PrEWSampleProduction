@@ -37,6 +37,13 @@ chmod u+x ./macros/*/*.sh
 ./macros/FullProduction/run_single_process.sh --process=4f_WW_sl --input-config=$(pwd)/scripts/config/input_250.config --output-config=$(pwd)/scripts/config/output_250.config
 ```
 
+Available processes are:
+
+Input name | Common name | Final state
+---|---|---
+4f_WW_sl  | Semileptonic W pair production | qq mu/tau nu 
+4f_sW_sl  | Semileptonic single-W production  | qq e nu
+
 ### How to create PrEW fit input
 
 Python code to convert the Marlin processor output into PrEW fit input is provided in the `PrEWInputProduction` directory.
