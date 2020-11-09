@@ -18,10 +18,6 @@ void SingleWProcessor::extract_observables(const EVENT::MCParticleVec &mcps) {
   }
 
   m_observables.e_charge = int(e->getCharge());
-  if (Utils::MC::is_mu(*e))
-    m_observables.decay_to_mu = true;
-  if (Utils::MC::is_tau(*e))
-    m_observables.decay_to_tau = true;
 
   // First try to see if W's are explicitely listed in MC list
   auto W_enu = Utils::MC::find_first_W(mcps, m_observables.e_charge);
@@ -50,5 +46,5 @@ void SingleWProcessor::extract_observables(const EVENT::MCParticleVec &mcps) {
   this->extract_ee_observables(*W_enu);
 
   // Extract lepton angles in W_lep system
-  this->extract_Wl_observables(*W_enu, *e);
+  this->extract_enu_observables(*W_enu, *e);
 }
