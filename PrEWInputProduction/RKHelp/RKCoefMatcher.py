@@ -13,13 +13,15 @@ class RKCoefMatcher:
     """
     
     MC_to_RK_names = {
-        "WW_muminus" : "WW_semilep_MuAntiNu",
-        "WW_muplus" : "WW_semilep_AntiMuNu"
+      "WW_muminus" : "WW_semilep_MuAntiNu",
+      "WW_muplus" : "WW_semilep_AntiMuNu",
+      "SingleW_eminus" : "singleWplussemileptonic",
+      "SingleW_eplus" : "singleWminussemileptonic"
     }
     
     RK_binning = {
-        "WW_semilep_MuAntiNu" : ["costh_Wminus_star","costh_l_star","phi_l_star"],
-        "WW_semilep_AntiMuNu" : ["costh_Wminus_star","costh_l_star","phi_l_star"]
+      "WW_semilep_MuAntiNu" : ["costh_Wminus_star","costh_l_star","phi_l_star"],
+      "WW_semilep_AntiMuNu" : ["costh_Wminus_star","costh_l_star","phi_l_star"]
     }
     
     # Sometimes binning is different (without affecting the cross section)
