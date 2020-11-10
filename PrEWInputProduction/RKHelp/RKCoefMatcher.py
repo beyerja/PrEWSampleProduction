@@ -21,7 +21,9 @@ class RKCoefMatcher:
     
     RK_binning = {
       "WW_semilep_MuAntiNu" : ["costh_Wminus_star","costh_l_star","phi_l_star"],
-      "WW_semilep_AntiMuNu" : ["costh_Wminus_star","costh_l_star","phi_l_star"]
+      "WW_semilep_AntiMuNu" : ["costh_Wminus_star","costh_l_star","phi_l_star"],
+      "singleWplussemileptonic" : ["costh_Whad_star", "costh_e_star", "m_enu"],
+      "singleWminussemileptonic" : ["costh_Whad_star", "costh_e_star", "m_enu"]
     }
     
     # Sometimes binning is different (without affecting the cross section)
