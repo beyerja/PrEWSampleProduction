@@ -43,7 +43,7 @@ void SingleWProcessor::extract_observables(const EVENT::MCParticleVec &mcps) {
   this->extract_lab_observables(*e);
 
   // Extract observables in ee rest frame
-  this->extract_ee_observables(*W_enu);
+  this->extract_ee_observables(*W_enu, *W_h);
 
   // Extract lepton angles in W_lep system
   this->extract_enu_observables(*W_enu, *e);

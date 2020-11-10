@@ -45,6 +45,5 @@ void SingleWProcessor::extract_enu_observables(const EVENT::MCParticle &W_enu,
 
   // --- Find observables ------------------------------------------------------
   m_observables.costh_e_star = e_tlv_enu_rot.CosTheta();
-  m_observables.phi_e_star = e_tlv_enu_rot.Phi();
   // ---------------------------------------------------------------------------
 }

@@ -96,7 +96,8 @@ private:
 
   void extract_observables(const EVENT::MCParticleVec &mcps);
   void extract_lab_observables(const EVENT::MCParticle &e);
-  void extract_ee_observables(const EVENT::MCParticle &W_enu);
+  void extract_ee_observables(const EVENT::MCParticle &W_enu,
+                              const EVENT::MCParticle &W_h);
   void extract_enu_observables(const EVENT::MCParticle &W_enu,
                                const EVENT::MCParticle &e);
 };

@@ -15,7 +15,7 @@ void SingleWProcessor::create_tree() {
 
   // Create and connect the observable branches
   m_tree->Branch("e_charge", &m_observables.e_charge, "e_charge/I");
-  m_tree->Branch("phi_e_star", &m_observables.phi_e_star, "phi_e_star/D");
   m_tree->Branch("costh_e_star", &m_observables.costh_e_star, "costh_e_star/D");
+  m_tree->Branch("costh_Whad_star", &m_observables.costh_Whad_star, "costh_Whad_star/D");
   m_tree->Branch("m_enu", &m_observables.m_enu, "m_enu/D");
 }
