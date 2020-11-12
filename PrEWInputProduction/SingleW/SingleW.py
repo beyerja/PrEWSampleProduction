@@ -32,8 +32,8 @@ def main():
     path_RR = "/nfs/dust/ilc/group/ild/beyerjac/TGCAnalysis/SampleProduction/NewMCProduction/4f_sW_sl/4f_sW_sl_eR_pR.root"
     input_LR = IH.InputInfo(path_LR, tree_name, energy)
     input_RL = IH.InputInfo(path_RL, tree_name, energy)
-    input_LL = IH.InputInfo(path_RL, tree_name, energy)
-    input_RR = IH.InputInfo(path_RL, tree_name, energy)
+    input_LL = IH.InputInfo(path_LL, tree_name, energy)
+    input_RR = IH.InputInfo(path_RR, tree_name, energy)
     inputs_os = [input_LR, input_RL] # Opposite sign chirality infos
 
     # Output settings
