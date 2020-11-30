@@ -13,7 +13,7 @@ void DifermionProcessor::extract_observables(const EVENT::MCParticleVec &mcps) {
   // Find the first after-collision fermion
   // (skip the initial e+e- and ISR -> skip 8)
   auto f = Utils::MC::find_first_fermion(mcps, 8);
-  auto fbar = Utils::MC::find_anti_partner(f);
+  auto fbar = Utils::MC::find_anti_partner(*f);
   streamlog_out(DEBUG) << "Found f: " << Utils::MC::print(*f) << std::endl;
   streamlog_out(DEBUG) << "Found fbar: " << Utils::MC::print(*fbar)
                        << std::endl;
