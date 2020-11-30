@@ -229,8 +229,8 @@ EVENT::MCParticle *MC::find_first(const EVENT::MCParticleVec &vec,
 
 //------------------------------------------------------------------------------
 
-EVENT::MCParticle *find_first_fermion(const EVENT::MCParticleVec &vec,
-                                      int skip = 0, int end = -1) {
+EVENT::MCParticle *MC::find_first_fermion(const EVENT::MCParticleVec &vec,
+                                      int skip, int end) {
   /** Return the first fermion (not specified if f or fbar) in the vector that
       fits any of the given IDs. Optional:
        - Skip the first N elements of the vector (e.g. to skip initial
@@ -285,7 +285,7 @@ EVENT::MCParticle *MC::find_first_W(const EVENT::MCParticleVec &vec,
 
 //------------------------------------------------------------------------------
 
-EVENT::MCParticle *find_anti_partner(const EVENT::MCParticle &mcp) {
+EVENT::MCParticle *MC::find_anti_partner(const EVENT::MCParticle &mcp) {
   /** Find the anti-partner (same parent, opposite sign PDG) to the given
    * particle.
    **/
