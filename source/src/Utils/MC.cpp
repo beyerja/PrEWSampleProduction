@@ -237,7 +237,7 @@ EVENT::MCParticle *find_first_fermion(const EVENT::MCParticleVec &vec,
          particles).
        - End search at given particle (-1 means whole vector)
    **/
-  auto fermion_ids{};
+  std::vector<int> fermion_ids{};
   for (int i = 1; i < 17; i++) {
     fermion_ids.push_back(i);
     fermion_ids.push_back(-i);
@@ -289,7 +289,8 @@ EVENT::MCParticle *find_anti_partner(const EVENT::MCParticle &mcp) {
   /** Find the anti-partner (same parent, opposite sign PDG) to the given
    * particle.
    **/
-  return MC::find_first(mcp.getParents().at(0).getDaughters(), -1*mcp.getPDG());
+  return MC::find_first(mcp.getParents().at(0)->getDaughters(),
+                        {-1 * mcp.getPDG()});
 }
 
 //------------------------------------------------------------------------------
