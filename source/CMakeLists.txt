@@ -8,6 +8,8 @@ include_directories( include )
 # called lib%(repository)s.so, that with be install in the lib directory
 # in the top level directory of your project 
 aux_source_directory( src/Utils SRC_FILES )
+aux_source_directory( src/Difermion SRC_FILES )
+aux_source_directory( src/Difermion/Processor SRC_FILES )
 aux_source_directory( src/WW SRC_FILES )
 aux_source_directory( src/WW/Processor SRC_FILES )
 aux_source_directory( src/SingleW SRC_FILES )

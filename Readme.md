@@ -41,6 +41,8 @@ Available processes are:
 
 Input name | Common name | Final state
 ---|---|---
+2f_Z_l  | Di-lepton production | mu mubar / tau taubar 
+2f_Z_h  | Di-quark production | qq
 4f_WW_sl  | Semileptonic W pair production | qq mu/tau nu 
 4f_sW_sl  | Semileptonic single-W production  | qq e nu
 
