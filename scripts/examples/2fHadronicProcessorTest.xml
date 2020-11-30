@@ -1,0 +1,33 @@
+<marlin>
+  
+  <execute>
+    <!-- List the processors to execute here ! -->
+    <processor name="MyDifermionProcessor" />
+  </execute>
+  
+  <global>
+    <!-- Change the input file here or by command line -->
+    <parameter name="LCIOInputFiles"> 
+      /pnfs/desy.de/ilc/prod/ilc/mc-2020/generated/250-SetA/2f_hadronic_eL_pR/E250-SetA.P2f_z_h.Gwhizard-2_8_5.eL.pR.I500010.2910.slcio
+    </parameter>
+    <!-- The maximum number of events + runs to process -->
+    <parameter name="MaxRecordNumber" value="0"/>
+    <!-- The number of events to skip on start -->
+    <parameter name="SkipNEvents" value="0"/>
+    <parameter name="SupressCheck" value="false"/>
+    <!-- Global verbosity -->
+    <parameter name="Verbosity" options="DEBUG0-4,MESSAGE0-4,WARNING0-4,ERROR0-4,SILENT"> MESSAGE </parameter>
+    <!-- A user random seed -->
+    <parameter name="RandomSeed" value="1234567890" />
+  </global>
+  
+  <!-- Your processor configuration here after -->
+  <processor name="MyDifermionProcessor" type="DifermionProcessor">
+    <!-- The MC particle collection name -->
+    <parameter name="MCParticleCollection" lcioInType="MCParticle"> MCParticle </parameter>
+    <parameter name="OutputFilePath"> 
+      /nfs/dust/ilc/group/ild/beyerjac/TGCAnalysis/SampleProduction/NewMCProduction/Test/2fHadronicTest.root
+    </parameter>
+  </processor>
+  
+</marlin>
