@@ -108,7 +108,7 @@ for e_pol in "${e_polarizations[@]}"; do
       condor_job_IDs+="${condor_job_output##* } "
       
       # Wait a little to not overload the condor scheduler
-      sleep 0.05s
+      sleep 0.01s
     done
     cd ${dir}
     
