@@ -49,12 +49,12 @@ def main():
         input = input, coords = coords, 
         output = OH.OutputInfo( output_dir, distr_name = "WW_muminus", create_plots = create_plots), 
         cuts = "(decay_to_mu == 1) && (l_charge == -1)",
-        syst = SSO.SystematicsOptions(use_muon_acc=True))
+        syst = SSO.SystematicsOptions(use_muon_acc=True,costh_branch="costh_l"))
       CPI.create_PrEW_input(
         input = input, coords = coords, 
         output = OH.OutputInfo( output_dir, distr_name = "WW_muplus", create_plots = create_plots), 
         cuts = "(decay_to_mu == 1) && (l_charge == +1)",
-        syst = SSO.SystematicsOptions(use_muon_acc=True))
+        syst = SSO.SystematicsOptions(use_muon_acc=True,costh_branch="costh_l"))
       CPI.create_PrEW_input(
         input = input, coords = coords, 
         output = OH.OutputInfo( output_dir, distr_name = "WW_tauminus", create_plots = create_plots), 

@@ -20,8 +20,18 @@ def get_costh_cut(cut_val, center_shift, width_shift, costh_branch):
   cut_str = "({} > {}) && ({} < {})".format(costh_branch, neg_cut, costh_branch,
                                             pos_cut)
   return cut_str
-  
 
+def get_ndim_costh_cut(cut_val, center_shift, width_shift, costh_branches):
+  """ Applying the same cos(theta) cut to multiple branches (/particles) at the
+      same time. 
+  """
+  cut_str = ""
+  for costh_branch in costh_branches:
+    if cut_str != "":
+      cut_str += " && "  
+    cut_str += get_costh_cut(cut_val, center_shift, width_shift, costh_branch)
+  return cut_str
+  
 # ------------------------------------------------------------------------------
 
 def get_coef_data(hist_nocut, hist_0, hist_c, hist_2c, hist_w, hist_2w, hist_cw, 
@@ -104,19 +114,23 @@ class MuonAccParametrisation:
           The dataframe that can be used to extract the changes with the cuts.
           The initial cut value which is the same on both side (+-cos(theta)).
           The deviation that is used in the test to find the cut-dependence.
-          The name of the cos(Theta_muon) branch.
+          The name of the cos(Theta_muon) branch (can be string or array).
         And two histogram-related input (name and coordinate information).
     """
     self.cut_val = cut_val
     self.delta = delta
     
+    # Need branch(es) as array, and allow passing as string
+    if isinstance(costh_branch, str):
+      costh_branch = [costh_branch]
+    
     # Five different cuts are tested 
-    rdf_0 =  rdf.Filter(get_costh_cut(cut_val, 0, 0, costh_branch))
-    rdf_c =  rdf.Filter(get_costh_cut(cut_val, delta, 0, costh_branch))
-    rdf_2c = rdf.Filter(get_costh_cut(cut_val, 2*delta, 0, costh_branch))
-    rdf_w =  rdf.Filter(get_costh_cut(cut_val, 0, delta, costh_branch))
-    rdf_2w = rdf.Filter(get_costh_cut(cut_val, 0, 2*delta, costh_branch))
-    rdf_cw = rdf.Filter(get_costh_cut(cut_val, delta, delta, costh_branch))
+    rdf_0 =  rdf.Filter(get_ndim_costh_cut(cut_val, 0, 0, costh_branch))
+    rdf_c =  rdf.Filter(get_ndim_costh_cut(cut_val, delta, 0, costh_branch))
+    rdf_2c = rdf.Filter(get_ndim_costh_cut(cut_val, 2*delta, 0, costh_branch))
+    rdf_w =  rdf.Filter(get_ndim_costh_cut(cut_val, 0, delta, costh_branch))
+    rdf_2w = rdf.Filter(get_ndim_costh_cut(cut_val, 0, 2*delta, costh_branch))
+    rdf_cw = rdf.Filter(get_ndim_costh_cut(cut_val, delta, delta, costh_branch))
   
     self.histptr_nocut =  DH.get_hist_ptr(rdf, distr_name + "_nocut", coords)
     self.histptr_0 =  DH.get_hist_ptr(rdf_0, distr_name + "_0", coords)

@@ -56,7 +56,7 @@ def create_PrEW_input(input, output, coords, cuts,
   if syst.use_muon_acc:
     muon_acc_cut = SMA.default_acc_cut()
     muon_acc = SMA.MuonAccParametrisation(rdf_after_cuts, muon_acc_cut, 0.001, 
-                                          "costh_l", output.distr_name, coords)
+                                          syst.costh_branch, output.distr_name, coords)
 
   # ----------------------- Trigger RDF operations -----------------------------
   log.debug("Triggering RDataFrame operations.")
