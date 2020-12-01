@@ -59,10 +59,7 @@ submit_script=${condor_directory}/submit_script.submit
 
 # Condor logging output 
 . ${output_config}
-condor_output_dir=${output_base}/CondorOutput
-if [[ ! -d ${condor_output_dir} ]] ; then # Create if not existing
-  mkdir -p ${condor_output_dir}
-fi
+condor_output_dir=${output_base}/CondorOutput/${process}
 
 # ------------------------------------------------------------------------------
 # Arrays with possible polarizations for looping
@@ -94,6 +91,12 @@ for e_pol in "${e_polarizations[@]}"; do
     # Start jobs for each steering file
     cd ${condor_directory}
     
+    # HTCondor log file directory (-> Make sure it exists)
+    condor_output_subdir="${condor_output_dir}/${e_pol}${p_pol}"
+    if [[ ! -d ${condor_output_subdir} ]] ; then # Create if not existing
+      mkdir -p ${condor_output_subdir}
+    fi
+    
     for steering_file in ${steering_files[@]}; do
       # The command to be executed: 
       # Load the needed software and start the Marlin run
@@ -101,7 +104,7 @@ for e_pol in "${e_polarizations[@]}"; do
       
       # Submit job to HTCondor using standard submitting setup
       # -> Start Marlin job and keep track of job ID to know when it's done
-      condor_job_output=$(condor_submit ${submit_script} log_dir=${condor_output_dir} arguments="${command_string}")
+      condor_job_output=$(condor_submit ${submit_script} log_dir=${condor_output_subdir} arguments="${command_string}")
       
       # Split output up by spaces and only read last part (which is cluster ID).
       # Details at: https://stackoverflow.com/questions/3162385/how-to-split-a-string-in-shell-and-get-the-last-field
@@ -115,7 +118,7 @@ for e_pol in "${e_polarizations[@]}"; do
     { # Use this scope for parallization of loop, don't include condor_submit in this to avoid spamming the local machine
     echo "Waiting for jobs of ${process} ${e_pol} ${p_pol} to finish."
     for job_ID in ${condor_job_IDs[@]}; do
-      job_log_path=$(ls ${condor_output_dir}/${job_ID}*.log)
+      job_log_path=$(ls ${condor_output_subdir}/${job_ID}*.log)
       
       # Write into variable to suppress spammy output.
       # Timeout after 15 seconds to restart command, else it gets stuck sometimes.
