@@ -52,8 +52,8 @@ def main():
     # --- Muons (w/ systematics) ------------------------------------------------
     for input in inputs:
       for m_low, m_high in mass_cuts:
-        distr_name = "2f_mu_{}to{}".format(final_state,int(m_low),int(m_high))
-        cuts = "(f_pdg == 13) && (m_ff > {}) && (m_ff < {})".format(fs_cut,m_low,m_high)
+        distr_name = "2f_mu_{}to{}".format(int(m_low),int(m_high))
+        cuts = "(f_pdg == 13) && (m_ff > {}) && (m_ff < {})".format(m_low,m_high)
         CPI.create_PrEW_input(
           input = input, coords = coords, 
           output = OH.OutputInfo( output_dir, distr_name = distr_name, create_plots = create_plots), 
@@ -63,8 +63,8 @@ def main():
     # --- Taus (no systematics) ------------------------------------------------
     for input in inputs:
       for m_low, m_high in mass_cuts:
-        distr_name = "2f_tau_{}to{}".format(final_state,int(m_low),int(m_high))
-        cuts = "(f_pdg == 15) && (m_ff > {}) && (m_ff < {})".format(fs_cut,m_low,m_high)
+        distr_name = "2f_tau_{}to{}".format(int(m_low),int(m_high))
+        cuts = "(f_pdg == 15) && (m_ff > {}) && (m_ff < {})".format(m_low,m_high)
         CPI.create_PrEW_input(
           input = input, coords = coords, 
           output = OH.OutputInfo( output_dir, distr_name = distr_name, create_plots = create_plots), 
