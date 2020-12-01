@@ -15,15 +15,15 @@ class RKCoefMatcher:
     MC_to_RK_names = {
       "WW_muminus" : "WW_semilep_MuAntiNu",
       "WW_muplus" : "WW_semilep_AntiMuNu",
-      "SingleW_eminus" : "singleWplussemileptonic",
-      "SingleW_eplus" : "singleWminussemileptonic"
+      "SingleW_eminus" : "sW_semilep_eMinus",
+      "SingleW_eplus" : "sW_semilep_ePlus"
     }
     
     RK_binning = {
       "WW_semilep_MuAntiNu" : ["costh_Wminus_star","costh_l_star","phi_l_star"],
       "WW_semilep_AntiMuNu" : ["costh_Wminus_star","costh_l_star","phi_l_star"],
-      "singleWplussemileptonic" : ["costh_Whad_star", "costh_e_star", "m_enu"],
-      "singleWminussemileptonic" : ["costh_Whad_star", "costh_e_star", "m_enu"]
+      "sW_semilep_eMinus" : ["costh_Whad_star", "costh_e_star", "m_enu"],
+      "sW_semilep_ePlus" : ["costh_Whad_star", "costh_e_star", "m_enu"]
     }
     
     # Sometimes binning is different (without affecting the cross section)
@@ -134,9 +134,10 @@ def default_coef_matcher():
     """ Get the default coef matcher that looks in all known RK distributions (at 250 GeV!!!).
     """
     matcher = RKCoefMatcher()
-    matcher.add_RK_file("/afs/desy.de/group/flc/pool/beyerjac/TGCAnalysis/GlobalFit/UnifiedApproach/MinimizationProcessFiles/ROOTfiles/MinimizationProcessesListFile_500_250Full_Elektroweak_menu_2018_04_03.root", "MinimizationProcesses250GeV")
-    matcher.add_RK_file("/nfs/dust/ilc/group/ild/beyerjac/TGCAnalysis/SampleProduction/WW_charge_separated/distributions/combined/Distribution_250GeV_WW_semilep_AntiMuNu.root", "MinimizationProcesses250GeV")
-    matcher.add_RK_file("/nfs/dust/ilc/group/ild/beyerjac/TGCAnalysis/SampleProduction/WW_charge_separated/distributions/combined/Distribution_250GeV_WW_semilep_MuAntiNu.root", "MinimizationProcesses250GeV")
+    matcher.add_RK_file("/nfs/dust/ilc/group/ild/beyerjac/TGCAnalysis/SampleProduction/MatrixElementDistributions/ww_sl0muq/distributions/combined/Distribution_250GeV_WW_semilep_AntiMuNu.root", "MinimizationProcesses250GeV")
+    matcher.add_RK_file("/nfs/dust/ilc/group/ild/beyerjac/TGCAnalysis/SampleProduction/MatrixElementDistributions/ww_sl0muq/distributions/combined/Distribution_250GeV_WW_semilep_MuAntiNu.root", "MinimizationProcesses250GeV")
+    matcher.add_RK_file("/nfs/dust/ilc/group/ild/beyerjac/TGCAnalysis/SampleProduction/MatrixElementDistributions/sw_sl0qq/distributions/combined/Distribution_250GeV_sW_semilep_eMinus.root", "MinimizationProcesses250GeV")
+    matcher.add_RK_file("/nfs/dust/ilc/group/ild/beyerjac/TGCAnalysis/SampleProduction/MatrixElementDistributions/sw_sl0qq/distributions/combined/Distribution_250GeV_sW_semilep_ePlus.root", "MinimizationProcesses250GeV")
     return matcher
 
 # ------------------------------------------------------------------------------

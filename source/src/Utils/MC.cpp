@@ -50,8 +50,8 @@ bool MC::is_type(const EVENT::MCParticle &mcp, const std::vector<int> &ids_plus,
   }
   if ((sign == 0) || (sign == -1)) {
     ids.insert(ids.end(), ids_minus.begin(), ids_minus.end());
-  } 
-  if ((sign != 0) && (std::abs(sign) != 1)){
+  }
+  if ((sign != 0) && (std::abs(sign) != 1)) {
     throw std::invalid_argument("Looking for invalid sign: " +
                                 std::to_string(sign));
   }
@@ -229,6 +229,24 @@ EVENT::MCParticle *MC::find_first(const EVENT::MCParticleVec &vec,
 
 //------------------------------------------------------------------------------
 
+EVENT::MCParticle *MC::find_first_fermion(const EVENT::MCParticleVec &vec,
+                                      int skip, int end) {
+  /** Return the first fermion (not specified if f or fbar) in the vector that
+      fits any of the given IDs. Optional:
+       - Skip the first N elements of the vector (e.g. to skip initial
+         particles).
+       - End search at given particle (-1 means whole vector)
+   **/
+  std::vector<int> fermion_ids{};
+  for (int i = 1; i < 17; i++) {
+    fermion_ids.push_back(i);
+    fermion_ids.push_back(-i);
+  }
+  return MC::find_first(vec, fermion_ids, skip, end);
+}
+
+//------------------------------------------------------------------------------
+
 EVENT::MCParticle *MC::find_first_lepton(const EVENT::MCParticleVec &vec,
                                          int skip, int end) {
   /** Return the first lepton in the vector that fits any of the given IDs.
@@ -263,6 +281,16 @@ EVENT::MCParticle *MC::find_first_W(const EVENT::MCParticleVec &vec,
   }
 
   return MC::find_first(vec, ids);
+}
+
+//------------------------------------------------------------------------------
+
+EVENT::MCParticle *MC::find_anti_partner(const EVENT::MCParticle &mcp) {
+  /** Find the anti-partner (same parent, opposite sign PDG) to the given
+   * particle.
+   **/
+  return MC::find_first(mcp.getParents().at(0)->getDaughters(),
+                        {-1 * mcp.getPDG()});
 }
 
 //------------------------------------------------------------------------------
@@ -371,11 +399,11 @@ IMPL::MCParticleImpl MC::create_W(const EVENT::MCParticle &mcp1,
 std::string MC::print(const EVENT::MCParticle &mcp) {
   /** Return a string of some vital information of the MC particle.
    **/
-  return std::string("E: ") + std::to_string(mcp.getEnergy()) + 
-        " Px: " + std::to_string(mcp.getMomentum()[0]) +
-        " Py: " + std::to_string(mcp.getMomentum()[1]) +
-        " Pz: " + std::to_string(mcp.getMomentum()[2]) +
-        " Charge: " + std::to_string(mcp.getCharge());
+  return std::string("E: ") + std::to_string(mcp.getEnergy()) +
+         " Px: " + std::to_string(mcp.getMomentum()[0]) +
+         " Py: " + std::to_string(mcp.getMomentum()[1]) +
+         " Pz: " + std::to_string(mcp.getMomentum()[2]) +
+         " Charge: " + std::to_string(mcp.getCharge());
 }
 
 //------------------------------------------------------------------------------

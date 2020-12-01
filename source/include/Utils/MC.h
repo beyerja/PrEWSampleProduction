@@ -6,8 +6,8 @@
 
 // Includes from iLCSoft
 #include "lcio.h"
-#include <IMPL/MCParticleImpl.h>
 #include <EVENT/MCParticle.h>
+#include <IMPL/MCParticleImpl.h>
 
 // Standard library
 #include <string>
@@ -39,10 +39,14 @@ bool is_W_compatible(const EVENT::MCParticle &mcp1,
 EVENT::MCParticle *find_first(const EVENT::MCParticleVec &vec,
                               std::vector<int> pdg_ids, int skip = 0,
                               int end = -1);
+EVENT::MCParticle *find_first_fermion(const EVENT::MCParticleVec &vec,
+                                      int skip = 0, int end = -1);
 EVENT::MCParticle *find_first_lepton(const EVENT::MCParticleVec &vec,
                                      int skip = 0, int end = -1);
 EVENT::MCParticle *find_first_W(const EVENT::MCParticleVec &vec,
                                 int charge = 0);
+
+EVENT::MCParticle *find_anti_partner(const EVENT::MCParticle &mcp);
 // -----------------------------------------------------------------------------
 
 // --- Elements according to ILD conventions -----------------------------------
@@ -53,7 +57,7 @@ EVENT::MCParticle *incoming_eP_after_ISR(const EVENT::MCParticleVec &vec);
 
 // --- Create MCParticles ------------------------------------------------------
 IMPL::MCParticleImpl create_W(const EVENT::MCParticle &mcp1,
-                           const EVENT::MCParticle &mcp2);
+                              const EVENT::MCParticle &mcp2);
 // -----------------------------------------------------------------------------
 
 // --- Print out related -------------------------------------------------------
