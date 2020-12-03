@@ -56,7 +56,8 @@ def create_PrEW_input(input, output, coords, cuts,
   muon_acc = None
   if syst.use_muon_acc:
     muon_acc_cut = SMA.default_acc_cut()
-    muon_acc = SMA.MuonAccParametrisation(rdf_after_cuts, muon_acc_cut, 0.001, 
+    delta = SMA.default_delta()
+    muon_acc = SMA.MuonAccParametrisation(rdf_after_cuts, muon_acc_cut, delta, 
                                           syst.costh_branch, output.distr_name, coords)
 
   # ----------------------- Trigger RDF operations -----------------------------

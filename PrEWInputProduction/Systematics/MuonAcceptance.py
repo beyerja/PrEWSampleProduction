@@ -173,4 +173,9 @@ def default_acc_cut():
   """
   return 0.95
 
+def default_delta():
+  """ Define the default delta variation used to calculate the cut dependence.
+  """
+  return 0.001
+
 # ------------------------------------------------------------------------------
