@@ -145,7 +145,7 @@ class MuonAccParametrisation:
         Details are not described here (probably in PrEW, else in thesis).
         Coefficients are added to data.
     """
-    hist_nocut = self.histptr_0.GetValue()
+    hist_nocut = self.histptr_nocut.GetValue()
     hist_0 =  self.histptr_0.GetValue()
     hist_c =  self.histptr_c.GetValue()
     hist_2c = self.histptr_2c.GetValue()
