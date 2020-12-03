@@ -147,30 +147,6 @@ def get_data(root_hist, coords):
 
 # ------------------------------------------------------------------------------
 
-def get_distr_filebase(distr_name, energy, eM_chirality, eP_chirality):
-    """ Filename convention for the distributions. 
-    """
-    eM_ID = ""
-    eP_ID = ""
-    
-    if (eM_chirality == -1):
-        eM_ID = "eL"
-    elif (eM_chirality == 1):
-        eM_ID = "eR"
-    else:
-        raise ValueError("Unknown e- chirality: {}".format(eM_chirality))
-        
-    if (eP_chirality == -1):
-        eP_ID = "pL"
-    elif (eP_chirality == 1):
-        eP_ID = "pR"
-    else:
-        raise ValueError("Unknown e+ chirality: {}".format(eP_chirality))
-      
-    return "{}_{}_{}{}".format(distr_name,energy,eM_ID,eP_ID)
-
-# ------------------------------------------------------------------------------
-
 def get_hist_ptr_1d(rdf, distr_name, coords):
     """ Get TH1D histogram pointer. """
     th1_setup = ROOT.TH1D(distr_name, distr_name,

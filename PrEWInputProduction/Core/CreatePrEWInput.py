@@ -11,6 +11,7 @@ import pandas as pd
 import sys
 
 # Local modules
+import Conventions as Conv
 sys.path.append("../IO")
 import CSVMetadata as CSVM
 sys.path.append("../RKHelp")
@@ -73,8 +74,8 @@ def create_PrEW_input(input, output, coords, cuts,
       output.distr_name, n_total, n_after_cuts, n_after_cuts/n_total*100.0))
 
   # Base for output file name
-  output_base_name = DH.get_distr_filebase(output.distr_name, input.energy, 
-                                           eM_chi, eP_chi)
+  output_base_name = Conv.csv_file_name(output.distr_name, input.energy, 
+                                      eM_chi, eP_chi)
   output_base = "{}/{}".format(output.dir, output_base_name)
 
   # Correctly normalize the histogram
