@@ -22,6 +22,8 @@ import DistrPlotting as DP
 sys.path.append("../Systematics")
 import MuonAcceptance as SMA
 import SystematicsOptions as SSO
+sys.path.append("../Validation")
+import MuonAccValidation as MAV
 
 # ------------------------------------------------------------------------------
 
@@ -54,11 +56,14 @@ def create_PrEW_input(input, output, coords, cuts,
 
   # Prepare the muon acceptance box if requested
   muon_acc = None
+  muon_acc_validator = None
   if syst.use_muon_acc:
     muon_acc_cut = SMA.default_acc_cut()
     delta = SMA.default_delta()
     muon_acc = SMA.MuonAccParametrisation(rdf_after_cuts, muon_acc_cut, delta, 
                                           syst.costh_branch, output.distr_name, coords)
+    muon_acc_validator = MAV.MuonAccValidator(rdf_after_cuts, muon_acc_cut, delta, 
+                                              syst.costh_branch, output.distr_name, coords)
 
   # ----------------------- Trigger RDF operations -----------------------------
   log.debug("Triggering RDataFrame operations.")
@@ -97,9 +102,11 @@ def create_PrEW_input(input, output, coords, cuts,
   coef_matcher = RKCM.default_coef_matcher()
   data = coef_matcher.add_coefs_to_data(output.distr_name, eM_chi, eP_chi, data)
 
-  # Try extracting the differential coefficients for the muon acceptance box
+  # Try extracting the differential coefficients for the muon acceptance box.
+  # Also validate the parametrisation.
   if muon_acc is not None:
     data = muon_acc.add_coefs_to_data(data)
+    muon_acc_validator.validate(data, output)
 
   # Create a pandas dataframe
   df = pd.DataFrame(data)
