@@ -106,7 +106,7 @@ def create_PrEW_input(input, output, coords, cuts,
   # Also validate the parametrisation.
   if muon_acc is not None:
     data = muon_acc.add_coefs_to_data(data)
-    muon_acc_validator.validate(data, output)
+    muon_acc_validator.validate(data, output, output_base_name)
 
   # Create a pandas dataframe
   df = pd.DataFrame(data)

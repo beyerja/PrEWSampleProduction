@@ -6,6 +6,8 @@
 # ------------------------------------------------------------------------------
 
 import logging as log
+from matplotlib import cm
+from matplotlib.colors import ListedColormap, LinearSegmentedColormap
 import numpy as np
 import ROOT
 import sys
@@ -78,16 +80,58 @@ class MuonAccValidator:
       costh_branch = [costh_branch]
     
     # Delta-center, Delta-width combinations to test
-    test_vals = []
-    for dc in [-10, -3, -1, -0.5, 0, 0.5, 1, 3, 10]:
-      for dw in [-10, -3, -1, -0.5, 0, 0.5, 1, 3, 10]:
-        test_vals.append([dc*delta,dw*delta])
+    self.dc_tests = [-5, -3, -1, -0.5, 0, 0.5, 1, 3, 5]
+    self.dw_tests = [-5, -3, -1, -0.5, 0, 0.5, 1, 3, 5]
+    self.dc_min = np.amin(self.dc_tests)
+    self.dc_max = np.amax(self.dc_tests)
+    self.dw_min = np.amin(self.dw_tests)
+    self.dw_max = np.amax(self.dw_tests)
+    self.test_vals = []
+    for dc in self.dc_tests:
+      for dw in self.dw_tests:
+        self.test_vals.append([dc*delta,dw*delta])
+        
+    # Create the needed ROOT colors
+    self.colors = []
+    self.create_colors()
     
     # Set up tests
-    self.tests = [SingleCutTest(rdf, cut_val, delta_c, delta_w, costh_branch, distr_name, coords) for delta_c, delta_w in test_vals]
+    self.tests = [SingleCutTest(rdf, cut_val, delta_c, delta_w, costh_branch, distr_name, coords) for delta_c, delta_w in self.test_vals]
     self.histptr_nocut =  DH.get_hist_ptr(rdf, distr_name + "_nocut_val", coords)
+
+  def get_d_norm(self, dc, dw):
+    """ Get normalized sum of dc and dw.
+        Sign is not considered, only absolute deviation from 0.
+    """
+    d_total = (abs(dc)+abs(dw)) / self.delta
+    d_max = np.amax([abs(self.dc_max),abs(self.dc_min)]) + np.amax([abs(self.dw_max),abs(self.dw_min)])
+    return d_total/d_max
+
+  def get_color_index(self, dc, dw):
+    """ Translate the devation into a (custom) ROOT color index.
+    """
+    # Assume there are less than 100 distinct values
+    return 9000 + int(1000.0*self.get_d_norm(dc,dw))
     
-  def validate(self, coef_data, output, extensions=["pdf","root"]):
+  def create_colors(self):
+    """ Create all the necessary ROOT TColors.
+    """
+    colormap = cm.get_cmap("inferno") # Get a matplot lib color map
+    indices = []
+    for test_val in self.test_vals:
+      c_i = self.get_color_index(test_val[0],test_val[1])
+      if c_i in indices: 
+        continue # already created
+      else:
+        indices.append(c_i)
+      
+      d_norm = self.get_d_norm(test_val[0],test_val[1])
+      c_r, c_g, c_b, alpha = colormap(d_norm)
+      
+      c_name = "NewColor{}".format(c_i)
+      self.colors.append(ROOT.TColor(c_i, c_r, c_g, c_b, c_name))
+    
+  def validate(self, coef_data, output, base_name, extensions=["pdf","root"]):
     """ Create plots to test the validity of the MuonAcceptance parametrisation 
         and its coefficients.
     """
@@ -97,7 +141,7 @@ class MuonAccValidator:
       log.error("Validation plots not implemented for histograms with dim != 1")
       return
 
-    stack_name = "{}_stack".format(self.distr_name)
+    stack_name = "{}_stack".format(base_name)
     canvas = ROOT.TCanvas("c_{}".format(stack_name))
     canvas.cd()
     stack = ROOT.THStack(stack_name, stack_name)
@@ -130,6 +174,8 @@ class MuonAccValidator:
         hist_diff.SetBinContent(bin, rel_sig)
         
         i += 1 # Increment bin index without under/over-flow
+      
+      hist_diff.SetLineColor(self.get_color_index(test.delta_c,test.delta_w))
       
       stack.Add(hist_diff)
     
