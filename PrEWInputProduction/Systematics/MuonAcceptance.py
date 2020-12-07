@@ -1,3 +1,5 @@
+import logging as log
+import numpy as np
 import ROOT
 import sys
 from tqdm import tqdm
@@ -34,21 +36,26 @@ def get_ndim_costh_cut(cut_val, center_shift, width_shift, costh_branches):
   
 # ------------------------------------------------------------------------------
 
-def get_coef_data(hist_nocut, hist_0, hist_c, hist_2c, hist_w, hist_2w, hist_cw, 
+def get_coef_data(hist_nocut, hist_0, hist_1, hist_2, hist_3, hist_4, hist_5, 
                   delta):
   """ Calculate all the coefficients and return them in a dictionary that can be
       written out by pandas into CSV.
-      Six histograms are needed:
+      Seven histograms are needed:
         - original without any cut at all
-        w/ cut:
-          - initial cut
-          - center moved by delta
-          - center moved by 2*delta
-          - width moved by delta
-          - width moved by 2*delta
-          - center moved by delta and width moved by delta
-      In addition, the value for delta is needed
+        - 6 histograms with cuts at predetermined points to determine the
+          polynomial coefficients.
+      The points:
+        # | delta_c [delta] | delta_w [delta]
+        0 |  0              |  0
+        1 |  0              |  2
+        2 |  0              | -2
+        3 |  0.5            |  2
+        4 | -0.5            | -2
+        5 |  1              | -2 
+      In addition, the value for delta is needed.
   """
+  cut_hists = [hist_0, hist_1, hist_2, hist_3, hist_4, hist_5]
+  
   # Coefficients to collect:
   k_0 = []
   k_c = []
@@ -60,7 +67,7 @@ def get_coef_data(hist_nocut, hist_0, hist_c, hist_2c, hist_w, hist_2w, hist_cw,
   # Doing this in loop instead of with TH1-operators to control each case
   bin_range = DH.get_bin_range(hist_nocut)
   insufficient_MC_bins = 0 # Count the number of bins w/ insufficient MC
-  for bin in tqdm(bin_range, desc="\tCalculate muon acc. coefs"):
+  for bin in tqdm(bin_range, desc="Calculate muon acc. coefs"):
     # Skip overflow and underflow bins
     if hist_nocut.IsBinUnderflow(bin) or hist_nocut.IsBinOverflow(bin): 
       continue
@@ -74,23 +81,19 @@ def get_coef_data(hist_nocut, hist_0, hist_c, hist_2c, hist_w, hist_2w, hist_cw,
       insufficient_MC_bins += 1
       continue 
     
-    R_0 = float(hist_0.GetBinContent(bin)) / N_nocut
-    R_c = float(hist_c.GetBinContent(bin)) / N_nocut
-    R_2c = float(hist_2c.GetBinContent(bin)) / N_nocut
-    R_w = float(hist_w.GetBinContent(bin)) / N_nocut
-    R_2w = float(hist_2w.GetBinContent(bin)) / N_nocut
-    R_cw = float(hist_cw.GetBinContent(bin)) / N_nocut
+    # Ratios in this bin for each histogram (with different cut points)
+    R = np.array([float(hist.GetBinContent(bin)) / N_nocut for hist in cut_hists])
     
     # Actual calculation of the coefficients
-    k_0.append(R_0)
-    k_c.append( 1.0/delta * (-1.5*R_0 + 2.0*R_c - 0.5*R_2c) )
-    k_w.append( 1.0/delta * (-1.5*R_0 + 2.0*R_w - 0.5*R_2w) )
-    k_c2.append( 1.0/delta**2 * (0.5*R_0 - R_c + 0.5*R_2c) )
-    k_w2.append( 1.0/delta**2 * (0.5*R_0 - R_w + 0.5*R_2w) )
-    k_cw.append( 1.0/delta**2 * (R_0 + R_cw - R_c - R_w) )
+    k_0.append(R[0])
+    k_c.append( 1.0/delta * ( - R[1] + R[2] + R[3] - R[4]) )
+    k_w.append( 1.0/(4.0*delta) * ( R[1] - R[2] ) )
+    k_c2.append( 2.0/(3.0*delta**2) * ( -3.0 * R[2] + 2.0 * R[4] + R[5]) )
+    k_w2.append( 1.0/(8.0*delta**2) * ( -2.0 * R[0] + R[1] + R[2]) )
+    k_cw.append( 1.0/delta**2 * (-1.0/2.0 * R[1] + 1.0/2.0 * R[3] + 1.0/6.0 * R[4] - 1.0/6.0 * R[5]) )
 
   if (insufficient_MC_bins > 0):
-    print("Had to skip {} bins due to insufficient MC.".format(insufficient_MC_bins))
+    log.info("Had to skip {} bins due to insufficient MC.".format(insufficient_MC_bins))
 
   return {"MuonAcc_k0": k_0, 
           "MuonAcc_kc": k_c, "MuonAcc_kw": k_w, 
@@ -126,19 +129,19 @@ class MuonAccParametrisation:
     
     # Five different cuts are tested 
     rdf_0 =  rdf.Filter(get_ndim_costh_cut(cut_val, 0, 0, costh_branch))
-    rdf_c =  rdf.Filter(get_ndim_costh_cut(cut_val, delta, 0, costh_branch))
-    rdf_2c = rdf.Filter(get_ndim_costh_cut(cut_val, 2*delta, 0, costh_branch))
-    rdf_w =  rdf.Filter(get_ndim_costh_cut(cut_val, 0, delta, costh_branch))
-    rdf_2w = rdf.Filter(get_ndim_costh_cut(cut_val, 0, 2*delta, costh_branch))
-    rdf_cw = rdf.Filter(get_ndim_costh_cut(cut_val, delta, delta, costh_branch))
+    rdf_1 =  rdf.Filter(get_ndim_costh_cut(cut_val, 0, 2.0*delta, costh_branch))
+    rdf_2 =  rdf.Filter(get_ndim_costh_cut(cut_val, 0, -2.0*delta, costh_branch))
+    rdf_3 =  rdf.Filter(get_ndim_costh_cut(cut_val, 0.5*delta, 2.0*delta, costh_branch))
+    rdf_4 =  rdf.Filter(get_ndim_costh_cut(cut_val, -0.5*delta, -2.0*delta, costh_branch))
+    rdf_5 =  rdf.Filter(get_ndim_costh_cut(cut_val, delta, -2.0*delta, costh_branch))
   
     self.histptr_nocut =  DH.get_hist_ptr(rdf, distr_name + "_nocut", coords)
-    self.histptr_0 =  DH.get_hist_ptr(rdf_0, distr_name + "_0", coords)
-    self.histptr_c =  DH.get_hist_ptr(rdf_c, distr_name + "_c", coords)
-    self.histptr_2c = DH.get_hist_ptr(rdf_2c, distr_name + "_2c", coords)
-    self.histptr_w =  DH.get_hist_ptr(rdf_w, distr_name + "_w", coords)
-    self.histptr_2w = DH.get_hist_ptr(rdf_2w, distr_name + "_2w", coords)
-    self.histptr_cw = DH.get_hist_ptr(rdf_cw, distr_name + "_cw", coords)
+    self.histptr_0 = DH.get_hist_ptr(rdf_0, distr_name + "_0", coords)
+    self.histptr_1 = DH.get_hist_ptr(rdf_1, distr_name + "_1", coords)
+    self.histptr_2 = DH.get_hist_ptr(rdf_2, distr_name + "_2", coords)
+    self.histptr_3 = DH.get_hist_ptr(rdf_3, distr_name + "_3", coords)
+    self.histptr_4 = DH.get_hist_ptr(rdf_4, distr_name + "_4", coords)
+    self.histptr_5 = DH.get_hist_ptr(rdf_5, distr_name + "_5", coords)
   
   def add_coefs_to_data(self, distr_data):
     """ Parametrisation uses 2nd order polynomial approach for 2 parameters.
@@ -146,15 +149,15 @@ class MuonAccParametrisation:
         Coefficients are added to data.
     """
     hist_nocut = self.histptr_nocut.GetValue()
-    hist_0 =  self.histptr_0.GetValue()
-    hist_c =  self.histptr_c.GetValue()
-    hist_2c = self.histptr_2c.GetValue()
-    hist_w =  self.histptr_w.GetValue()
-    hist_2w = self.histptr_2w.GetValue()
-    hist_cw = self.histptr_cw.GetValue()
+    hist_0 = self.histptr_0.GetValue()
+    hist_1 = self.histptr_1.GetValue()
+    hist_2 = self.histptr_2.GetValue()
+    hist_3 = self.histptr_3.GetValue()
+    hist_4 = self.histptr_4.GetValue()
+    hist_5 = self.histptr_5.GetValue()
     
-    coef_data = get_coef_data(hist_nocut, hist_0, hist_c, hist_2c, hist_w, 
-                              hist_2w, hist_cw, self.delta)
+    coef_data = get_coef_data(hist_nocut, hist_0, hist_1, hist_2, hist_3, 
+                              hist_4, hist_5, self.delta)
     
     for coef_name, coefs in coef_data.items():
         distr_data["Coef:{}".format(coef_name)] = coefs
@@ -176,6 +179,6 @@ def default_acc_cut():
 def default_delta():
   """ Define the default delta variation used to calculate the cut dependence.
   """
-  return 0.001
+  return 2.0e-4
 
 # ------------------------------------------------------------------------------
