@@ -17,8 +17,8 @@ def get_costh_cut(cut_val, center_shift, width_shift, costh_branch):
         The change that of the acceptance width (width_shift).
         The name of the cos(Theta) branch.
   """
-  pos_cut =   abs(cut_val) + center_shift + width_shift
-  neg_cut = - abs(cut_val) + center_shift - width_shift  
+  pos_cut =   abs(cut_val) + center_shift + width_shift/2.0
+  neg_cut = - abs(cut_val) + center_shift - width_shift/2.0
   cut_str = "({} > {}) && ({} < {})".format(costh_branch, neg_cut, costh_branch,
                                             pos_cut)
   return cut_str
