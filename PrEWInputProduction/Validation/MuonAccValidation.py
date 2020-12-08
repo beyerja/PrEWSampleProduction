@@ -74,6 +74,7 @@ class MuonAccValidator:
     self.cut_val = cut_val
     self.delta = delta
     self.distr_name = distr_name
+    self.coords = coords
     
     # Need branch(es) as array, and allow passing as string
     if isinstance(costh_branch, str):
@@ -131,31 +132,42 @@ class MuonAccValidator:
       c_name = "NewColor{}".format(c_i)
       self.colors.append(ROOT.TColor(c_i, c_r, c_g, c_b, c_name))
     
-  def validate(self, coef_data, output, base_name, extensions=["pdf","root"]):
+  def validate(self, coef_data, sig_scale, output, base_name, extensions=["pdf","root"]):
     """ Create plots to test the validity of the MuonAcceptance parametrisation 
         and its coefficients.
+        Requires a "significance scale" which correctly scales the histograms
+        to some luminosity in order to meaningfully assess a significance of the
+        mistake made by the parametrisation.
     """
 
     hist_nocuts = self.histptr_nocut.GetPtr()
+    hist_nocuts.Scale(sig_scale)
     if not hist_nocuts.GetDimension() == 1:
       log.error("Validation plots not implemented for histograms with dim != 1")
       return
 
-    stack_name = "{}_stack".format(base_name)
-    canvas = ROOT.TCanvas("c_{}".format(stack_name))
-    canvas.cd()
-    stack = ROOT.THStack(stack_name, stack_name)
+    stack_name_base = "{}_stack".format(base_name)
+    stack_name_diff = "{}_rel_diff".format(stack_name_base)
+    stack_name_sig = "{}_sig".format(stack_name_base)
+
+    stack_diff = ROOT.THStack(stack_name_diff, stack_name_diff)
+    stack_sig = ROOT.THStack(stack_name_sig, stack_name_sig)
 
     for test in self.tests:
       hist = test.hist_ptr.GetPtr()
+      hist.Scale(sig_scale)
+      
+      # Create the histograms that test the mistake made by the parametrisation
       hist_diff = hist_nocuts.Clone()
-      hist_diff.SetName("{}_scaling".format(hist.GetName()))
+      hist_diff.SetName("{}_rel_diff".format(hist.GetName()))
+      hist_sig = hist_nocuts.Clone()
+      hist_sig.SetName("{}_sig".format(hist.GetName()))
       factors = binned_muon_acc_factors(coef_data, test.delta_c, test.delta_w)
       
       i = 0 # bin index not including under/over-flow
-      for bin in DH.get_bin_range(hist_diff):
+      for bin in DH.get_bin_range(hist):
         # Skip overflow and underflow bins
-        if hist_diff.IsBinUnderflow(bin) or hist_diff.IsBinOverflow(bin): 
+        if hist.IsBinUnderflow(bin) or hist.IsBinOverflow(bin): 
           continue
         
         # Determine the factor for the bin (caused by the cut)  
@@ -165,28 +177,48 @@ class MuonAccValidator:
         elif factor < 0:
           factor = 0
         
-        # Determine the relative difference caused by using the parametrisation
         par_content = factor*hist_nocuts.GetBinContent(bin) 
         true_content = hist.GetBinContent(bin)
         nocut_content = hist_nocuts.GetBinContent(bin)
         
-        rel_sig = abs(par_content - true_content) / abs(nocut_content - true_content) if abs(nocut_content - true_content) > 0 else 0
-        hist_diff.SetBinContent(bin, rel_sig)
+        # Determine the relative difference caused by using the parametrisation
+        rel_diff = abs(par_content - true_content) / abs(nocut_content - true_content) if abs(nocut_content - true_content) > 0 else 0
+        hist_diff.SetBinContent(bin, rel_diff)
+        
+        # Detemine the significance of the difference
+        sig = abs(par_content - true_content) / np.sqrt(true_content) if abs(true_content) > 0 else 0
+        hist_sig.SetBinContent(bin, sig)
         
         i += 1 # Increment bin index without under/over-flow
       
-      hist_diff.SetLineColor(self.get_color_index(test.delta_c,test.delta_w))
+      color = self.get_color_index(test.delta_c,test.delta_w)
+      hist_diff.SetLineColor(color)
+      hist_sig.SetLineColor(color)
       
-      stack.Add(hist_diff)
+      stack_diff.Add(hist_diff, "hist")
+      stack_sig.Add(hist_sig, "hist")
     
-    stack.Draw("nostack")
+    # Draw and save the two stacks
+    canvas_diff = ROOT.TCanvas("c_{}".format(stack_name_diff))
+    canvas_diff.cd()
+    stack_diff.Draw("nostack")
+    stack_diff.GetXaxis().SetTitle(self.coords[0].name)
+    stack_diff.GetYaxis().SetTitle("|N_{param}-N_{cut}|/|N_{cut}-N_{no cut}|")
     
+    canvas_sig = ROOT.TCanvas("c_{}".format(stack_name_sig))
+    canvas_sig.cd()
+    stack_sig.Draw("nostack")
+    stack_sig.GetXaxis().SetTitle(self.coords[0].name)
+    stack_sig.GetYaxis().SetTitle("|N_{param}-N_{cut}|/#sqrt{N_{cut}}")
+    
+    # Save the histogram
     for extension in extensions:
       # Create the plot subdirectory
       plot_subdir = "{}/plots/{}".format(output.dir,extension)
       OH.create_dir(plot_subdir)
       
       # Save the histogram
-      canvas.Print("{}/{}.{}".format(plot_subdir, stack_name, extension))
+      canvas_diff.Print("{}/{}.{}".format(plot_subdir, stack_name_diff, extension))
+      canvas_sig.Print("{}/{}.{}".format(plot_subdir, stack_name_sig, extension))
 
 # ------------------------------------------------------------------------------
