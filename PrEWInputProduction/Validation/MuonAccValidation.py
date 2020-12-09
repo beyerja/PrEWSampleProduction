@@ -87,7 +87,7 @@ class MuonAccValidator:
     self.test_vals = []
     for dc in self.dc_tests:
       for dw in self.dw_tests:
-        if abs(dc) + abs(dw) > self.d_max+0.01:
+        if np.sqrt(dc**2+dw**2) > self.d_max+0.001:
           continue
         else:
           self.test_vals.append([dc*delta,dw*delta])
@@ -101,10 +101,10 @@ class MuonAccValidator:
     self.histptr_nocut =  DH.get_hist_ptr(rdf, distr_name + "_nocut_val", coords)
 
   def get_d_norm(self, dc, dw):
-    """ Get normalized sum of dc and dw.
+    """ Get normalized root-of-squares sum of dc and dw.
         Sign is not considered, only absolute deviation from 0.
     """
-    d_total = (abs(dc)+abs(dw)) / self.delta
+    d_total = np.sqrt(dc**2+dw**2) / self.delta
     return d_total/self.d_max
 
   def get_color_index(self, dc, dw):
@@ -116,7 +116,7 @@ class MuonAccValidator:
   def create_colors(self):
     """ Create all the necessary ROOT TColors.
     """
-    colormap = cm.get_cmap("inferno") # Get a matplot lib color map
+    colormap = cm.get_cmap("plasma") # Get a matplot lib color map
     indices = []
     for test_val in self.test_vals:
       c_i = self.get_color_index(test_val[0],test_val[1])
@@ -131,7 +131,7 @@ class MuonAccValidator:
       c_name = "NewColor{}".format(c_i)
       self.colors.append(ROOT.TColor(c_i, c_r, c_g, c_b, c_name))
     
-  def validate(self, coef_data, sig_scale, output, base_name, extensions=["pdf","root"]):
+  def validate(self, coef_data, sig_scale, output, base_name, extensions=["pdf","png","root"]):
     """ Create plots to test the validity of the MuonAcceptance parametrisation 
         and its coefficients.
         Requires a "significance scale" which correctly scales the histograms
