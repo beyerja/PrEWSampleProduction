@@ -5,6 +5,9 @@ import scipy.optimize as opt
 import sys
 from tqdm import tqdm
 
+# Local modules
+sys.path.append("../IO")
+import OutputHelpers as OH
 sys.path.append("../ROOTHelp")
 import DistrHelpers as DH
 
@@ -157,6 +160,7 @@ class MuonAccParametrisation:
     """
     self.cut_val = cut_val
     self.delta = delta
+    self.coords = coords
     
     # Need branch(es) as array, and allow passing as string
     if isinstance(costh_branch, str):
@@ -210,6 +214,42 @@ class MuonAccParametrisation:
         distr_data["Coef:{}".format(coef_name)] = coefs
     
     return distr_data
+    
+  def plot_cut_result(self, output, base_name, extensions=["pdf","png","root"]):
+    """ Plot the effect of the cut.
+        Only plot the cut without deviations (deviations are too small to be 
+        seen anyway).
+    """
+    hist_nocut = self.histptr_nocut.GetValue()
+    hist_cut = self.histptr_0.GetValue()
+    if not hist_nocut.GetDimension() == 1:
+      log.error("Cut plotting not implemented for histograms with dim != 1")
+      return
+      
+    # Plot the two histograms
+    canvas = ROOT.TCanvas("c_{}_CutEffect".format(hist_cut.GetName()))
+    canvas.cd()
+    
+    hist_nocut.SetLineColor(ROOT.kBlue)
+    hist_cut.SetLineColor(ROOT.kRed)
+    hist_nocut.Draw("hist")
+    hist_cut.Draw("hist same")
+    hist_nocut.SetXTitle(self.coords[0].name)
+    hist_nocut.SetYTitle("MC Events (not normalised)")
+    
+    legend = ROOT.TLegend(0.2,0.65,0.48,0.9)
+    legend.AddEntry(hist_nocut, "No cuts")
+    legend.AddEntry(hist_cut, "Cut at |cos#theta| > {}".format(round(self.cut_val,3)))
+    legend.Draw()
+
+    # Save the canvas
+    for extension in extensions:
+      # Create the plot subdirectory
+      plot_subdir = "{}/plots/{}".format(output.dir,extension)
+      OH.create_dir(plot_subdir)
+      
+      # Save the histogram
+      canvas.Print("{}/{}_CutEffect.{}".format(plot_subdir, base_name, extension))
     
   def add_coefs_to_metadata(self, metadata):
     """ Add the needed global coefficients to the metadata.

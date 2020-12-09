@@ -91,6 +91,8 @@ def create_PrEW_input(input, output, coords, cuts,
   if (output.create_plots):
     log.debug("Create histogram plot.")
     DP.draw_hist(hist, output, output_base_name)
+    if muon_acc is not None:
+      muon_acc.plot_cut_result(output, output_base_name)
 
   # ----------------------- Producing PrEW input -------------------------------
   log.debug("Start producing PrEW input.")
