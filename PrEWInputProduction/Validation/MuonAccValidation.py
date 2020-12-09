@@ -81,16 +81,16 @@ class MuonAccValidator:
       costh_branch = [costh_branch]
     
     # Delta-center, Delta-width combinations to test
-    self.dc_tests = [-5, -3, -1, -0.5, 0, 0.5, 1, 3, 5]
-    self.dw_tests = [-5, -3, -1, -0.5, 0, 0.5, 1, 3, 5]
-    self.dc_min = np.amin(self.dc_tests)
-    self.dc_max = np.amax(self.dc_tests)
-    self.dw_min = np.amin(self.dw_tests)
-    self.dw_max = np.amax(self.dw_tests)
+    self.dc_tests = [-5, -2.5, -1, -0.5, 0, 0.5, 1, 2.5, 5]
+    self.dw_tests = [-5, -2.5, -1, -0.5, 0, 0.5, 1, 2.5, 5]
+    self.d_max = 5 # Maximum dc+dw value that will be tested
     self.test_vals = []
     for dc in self.dc_tests:
       for dw in self.dw_tests:
-        self.test_vals.append([dc*delta,dw*delta])
+        if abs(dc) + abs(dw) > self.d_max+0.01:
+          continue
+        else:
+          self.test_vals.append([dc*delta,dw*delta])
         
     # Create the needed ROOT colors
     self.colors = []
@@ -105,8 +105,7 @@ class MuonAccValidator:
         Sign is not considered, only absolute deviation from 0.
     """
     d_total = (abs(dc)+abs(dw)) / self.delta
-    d_max = np.amax([abs(self.dc_max),abs(self.dc_min)]) + np.amax([abs(self.dw_max),abs(self.dw_min)])
-    return d_total/d_max
+    return d_total/self.d_max
 
   def get_color_index(self, dc, dw):
     """ Translate the devation into a (custom) ROOT color index.
