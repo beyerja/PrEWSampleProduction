@@ -178,10 +178,9 @@ class MuonAccValidator:
         
         par_content = factor*hist_nocuts.GetBinContent(bin) 
         true_content = hist.GetBinContent(bin)
-        nocut_content = hist_nocuts.GetBinContent(bin)
         
         # Determine the relative difference caused by using the parametrisation
-        rel_diff = (par_content - true_content) / (nocut_content - true_content) if abs(nocut_content - true_content) > 0 else 0
+        rel_diff = (par_content - true_content) / true_content if true_content > 0 else 0
         hist_diff.SetBinContent(bin, rel_diff)
         
         # Detemine the significance of the difference
@@ -205,7 +204,7 @@ class MuonAccValidator:
     canvas_diff.cd()
     stack_diff.Draw("AP") # Is TMultiGraph, doesn't need "nostack"
     stack_diff.GetXaxis().SetTitle(self.coords[0].name)
-    stack_diff.GetYaxis().SetTitle("(N_{param}-N_{cut})/(N_{no cut}-N_{cut})")
+    stack_diff.GetYaxis().SetTitle("(N_{param}-N_{cut})/N_{cut}")
     
     canvas_sig = ROOT.TCanvas("c_{}".format(stack_name_sig))
     canvas_sig.cd()
