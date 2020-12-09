@@ -150,7 +150,7 @@ class MuonAccValidator:
     stack_name_diff = "{}_rel_diff".format(stack_name_base)
     stack_name_sig = "{}_sig".format(stack_name_base)
 
-    stack_diff = ROOT.THStack(stack_name_diff, stack_name_diff)
+    stack_diff = ROOT.TMultiGraph(stack_name_diff, stack_name_diff)
     stack_sig = ROOT.THStack(stack_name_sig, stack_name_sig)
 
     for test in self.tests:
@@ -182,7 +182,7 @@ class MuonAccValidator:
         nocut_content = hist_nocuts.GetBinContent(bin)
         
         # Determine the relative difference caused by using the parametrisation
-        rel_diff = abs(par_content - true_content) / abs(nocut_content - true_content) if abs(nocut_content - true_content) > 0 else 0
+        rel_diff = (par_content - true_content) / (nocut_content - true_content) if abs(nocut_content - true_content) > 0 else 0
         hist_diff.SetBinContent(bin, rel_diff)
         
         # Detemine the significance of the difference
@@ -191,19 +191,22 @@ class MuonAccValidator:
         
         i += 1 # Increment bin index without under/over-flow
       
+      # Convert diff histogram to graf (because contains negative values)
+      graph_diff = ROOT.TGraph(hist_diff)
+      
       color = self.get_color_index(test.delta_c,test.delta_w)
-      hist_diff.SetLineColor(color)
+      graph_diff.SetMarkerColor(color)
       hist_sig.SetLineColor(color)
       
-      stack_diff.Add(hist_diff, "hist")
+      stack_diff.Add(graph_diff)
       stack_sig.Add(hist_sig, "hist")
     
     # Draw and save the two stacks
     canvas_diff = ROOT.TCanvas("c_{}".format(stack_name_diff))
     canvas_diff.cd()
-    stack_diff.Draw("nostack")
+    stack_diff.Draw("AP") # Is TMultiGraph, doesn't need "nostack"
     stack_diff.GetXaxis().SetTitle(self.coords[0].name)
-    stack_diff.GetYaxis().SetTitle("|N_{param}-N_{cut}|/|N_{cut}-N_{no cut}|")
+    stack_diff.GetYaxis().SetTitle("(N_{param}-N_{cut})/(N_{no cut}-N_{cut})")
     
     canvas_sig = ROOT.TCanvas("c_{}".format(stack_name_sig))
     canvas_sig.cd()
