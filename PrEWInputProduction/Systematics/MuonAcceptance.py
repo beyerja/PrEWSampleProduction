@@ -186,8 +186,14 @@ class MuonAccParametrisation:
     self.cut_deltas = [[],[]] # Cut values [[dcenter],[dwidth]]
     self.hist_ptrs = [] # Histograms at those cut values
     d_vals = np.array([-1.5, -1, -0.5, 0, 0.5, 1, 1.5])*delta
+    d_max = 1.5*delta * 1.001 # *1.001 for numerical uncertainty
     for dc in d_vals:
       for dw in d_vals:
+        # Restrict to a circle of 1.5 to avoid too much weight on outer points
+        if np.sqrt(dc**2 + dw**2) > d_max:
+          continue
+        
+        # Set up the cut test
         self.cut_deltas[0].append(dc)
         self.cut_deltas[1].append(dw)
         rdf_cut = rdf.Filter(get_ndim_costh_cut(cut_val, dc, dw, costh_branch))
