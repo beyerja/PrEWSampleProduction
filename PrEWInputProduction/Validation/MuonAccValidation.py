@@ -144,13 +144,22 @@ class MuonAccValidator:
     if not hist_nocuts.GetDimension() == 1:
       log.error("Validation plots not implemented for histograms with dim != 1")
       return
+      
+    # Find the histogram that has the cut without deviations
+    hist_0_arr = [test for test in self.tests if (test.delta_c == 0 and test.delta_w == 0)]
+    if not len(hist_0_arr) == 1:
+      raise ValueError("Didn't find exactly one zero-cut array, found {}".format(len(hist_0_arr)))
+    hist_0 = hist_0_arr[0].hist_ptr.GetPtr()
 
+    # Create the stacks for the result checks
     stack_name_base = "{}_stack".format(base_name)
     stack_name_diff = "{}_rel_diff".format(stack_name_base)
     stack_name_sig = "{}_sig".format(stack_name_base)
+    stack_name_rel = "{}_relevance".format(stack_name_base)
 
     stack_diff = ROOT.TMultiGraph(stack_name_diff, stack_name_diff)
     stack_sig = ROOT.THStack(stack_name_sig, stack_name_sig)
+    stack_rel = ROOT.TMultiGraph(stack_name_rel, stack_name_rel)
 
     for test in self.tests:
       hist = test.hist_ptr.GetPtr()
@@ -161,6 +170,10 @@ class MuonAccValidator:
       hist_diff.SetName("{}_rel_diff".format(hist.GetName()))
       hist_sig = hist_nocuts.Clone()
       hist_sig.SetName("{}_sig".format(hist.GetName()))
+      hist_rel = hist_nocuts.Clone()
+      hist_rel.SetName("{}_relevance".format(hist.GetName()))
+      
+      # Get the factors that describe the result of the parametrisation
       factors = binned_muon_acc_factors(coef_data, test.delta_c, test.delta_w)
       
       i = 0 # bin index not including under/over-flow
@@ -178,6 +191,7 @@ class MuonAccValidator:
         
         par_content = factor*hist_nocuts.GetBinContent(bin) 
         true_content = hist.GetBinContent(bin)
+        cut0_content = hist_0.GetBinContent(bin)
         
         # Determine the relative difference caused by using the parametrisation
         rel_diff = (par_content - true_content) / true_content if true_content > 0 else 0
@@ -187,17 +201,24 @@ class MuonAccValidator:
         sig = abs(par_content - true_content) / np.sqrt(true_content) if abs(true_content) > 0 else 0
         hist_sig.SetBinContent(bin, sig)
         
+        # Detemine the relevance of the difference (compared to actual change of cut)
+        relevance = (par_content - true_content) / (true_content - cut0_content) if abs(true_content - cut0_content) > 0 else 0
+        hist_rel.SetBinContent(bin, relevance)
+        
         i += 1 # Increment bin index without under/over-flow
       
-      # Convert diff histogram to graf (because contains negative values)
+      # Convert histogram to graf (because contains negative values)
       graph_diff = ROOT.TGraph(hist_diff)
+      graph_rel = ROOT.TGraph(hist_rel)
       
       color = self.get_color_index(test.delta_c,test.delta_w)
       graph_diff.SetMarkerColor(color)
       hist_sig.SetLineColor(color)
+      graph_rel.SetMarkerColor(color)
       
       stack_diff.Add(graph_diff)
       stack_sig.Add(hist_sig, "hist")
+      stack_rel.Add(graph_rel)
     
     # Draw and save the two stacks
     canvas_diff = ROOT.TCanvas("c_{}".format(stack_name_diff))
@@ -212,6 +233,12 @@ class MuonAccValidator:
     stack_sig.GetXaxis().SetTitle(self.coords[0].name)
     stack_sig.GetYaxis().SetTitle("|N_{param}-N_{cut}|/#sqrt{N_{cut}}")
     
+    canvas_rel = ROOT.TCanvas("c_{}".format(stack_name_rel))
+    canvas_rel.cd()
+    stack_rel.Draw("AP")
+    stack_rel.GetXaxis().SetTitle(self.coords[0].name)
+    stack_rel.GetYaxis().SetTitle("(N_{param}-N_{cut})/(N_{cut}-N_{cut,0})")
+    
     # Save the histogram
     for extension in extensions:
       # Create the plot subdirectory
@@ -221,5 +248,6 @@ class MuonAccValidator:
       # Save the histogram
       canvas_diff.Print("{}/{}.{}".format(plot_subdir, stack_name_diff, extension))
       canvas_sig.Print("{}/{}.{}".format(plot_subdir, stack_name_sig, extension))
+      canvas_rel.Print("{}/{}.{}".format(plot_subdir, stack_name_rel, extension))
 
 # ------------------------------------------------------------------------------
