@@ -112,7 +112,12 @@ def get_coef_data(hist_nocut, hist_0, hist_1, hist_2, hist_3, hist_4, hist_5,
     initial_guess.append( 1.0/(8.0*delta**2) * ( -2.0 * R_ini[0] + R_ini[1] + R_ini[2]) )
     initial_guess.append( 1.0/delta**2 * (-1.0/2.0 * R_ini[1] + 1.0/2.0 * R_ini[3] + 1.0/6.0 * R_ini[4] - 1.0/6.0 * R_ini[5]) )
     
-    # Now perform fit using wider array of points
+    # Now perform fit using wider array of points:
+    # - First try to estimate an uncertainty on the bin values using the 
+    #   MC statistics uncertainty
+    # - Check if that leads to a good initial chi^2, if not scale the 
+    #   uncertainties
+    # - Then perform fit using all points
     sigma = []
     for hist in hists:
       if float(hist.GetBinContent(bin)) == 0:
@@ -120,6 +125,12 @@ def get_coef_data(hist_nocut, hist_0, hist_1, hist_2, hist_3, hist_4, hist_5,
       else:
         sigma.append(np.sqrt(hist.GetBinContent(bin))/N_nocut)
         
+    R_prefit = muon_acc_factor(np.array(cut_deltas), initial_guess[0], initial_guess[1], initial_guess[2], initial_guess[3], initial_guess[4], initial_guess[5])
+    chi_sq_ndf = np.sum( ( ( R_prefit - np.array(R) ) / np.array(sigma) )**2 ) / (len(R) - len(initial_guess))
+    if (chi_sq_ndf > 2) or ((chi_sq_ndf > 1e-15) and (chi_sq_ndf < 0.1)):
+      sigma = [ s * np.sqrt(chi_sq_ndf) for s in sigma ]
+        
+    # Perform fit
     coefs, cov = opt.curve_fit(muon_acc_factor, cut_deltas, R, sigma=sigma, p0=initial_guess)
     
     # Extract final coefficients
