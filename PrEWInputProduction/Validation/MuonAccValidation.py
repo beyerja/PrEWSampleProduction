@@ -160,6 +160,12 @@ class MuonAccValidator:
     stack_diff = ROOT.TMultiGraph(stack_name_diff, stack_name_diff)
     stack_sig = ROOT.THStack(stack_name_sig, stack_name_sig)
     stack_rel = ROOT.TMultiGraph(stack_name_rel, stack_name_rel)
+    
+    # Arrays to track 1D distribution of deviations depending on the test radius
+    r_steps = [ 0.0, 0.75, 1.5, 3.0, 5.5]
+    r_colors = [self.get_color_index(r*self.delta,0) for r in [0.5, np.sqrt(2), 2.5, 5]]
+    vals_sig = [[] for r in range(len(r_steps)-1)] # deviation-significance
+    vals_rel = [[] for r in range(len(r_steps)-1)] # deviation-relevance
 
     for test in self.tests:
       hist = test.hist_ptr.GetPtr()
@@ -175,6 +181,14 @@ class MuonAccValidator:
       
       # Get the factors that describe the result of the parametrisation
       factors = binned_muon_acc_factors(coef_data, test.delta_c, test.delta_w)
+      
+      # Find the right radius-index to store the deviations in
+      i_r = None
+      d_tot = self.get_d_norm(test.delta_c, test.delta_w) * self.d_max
+      for s in range(len(r_steps)-1):
+        if (d_tot >= r_steps[s]) and (d_tot < r_steps[s+1]):
+          i_r = s
+          break
       
       i = 0 # bin index not including under/over-flow
       for bin in DH.get_bin_range(hist):
@@ -200,10 +214,14 @@ class MuonAccValidator:
         # Detemine the significance of the difference
         sig = abs(par_content - true_content) / np.sqrt(true_content) if abs(true_content) > 0 else 0
         hist_sig.SetBinContent(bin, sig)
+        if true_content - cut0_content != 0:
+          vals_sig[i_r].append(sig)
         
-        # Detemine the relevance of the difference (compared to actual change of cut)
+        # Determine the relevance of the difference (compared to actual change of cut)
         relevance = (par_content - true_content) / (true_content - cut0_content) if abs(true_content - cut0_content) > 0 else 0
         hist_rel.SetBinContent(bin, relevance)
+        if true_content - cut0_content != 0:
+          vals_rel[i_r].append(relevance)
         
         i += 1 # Increment bin index without under/over-flow
       
@@ -220,7 +238,7 @@ class MuonAccValidator:
       stack_sig.Add(hist_sig, "hist")
       stack_rel.Add(graph_rel)
     
-    # Draw and save the two stacks
+    # Draw and save the stacks
     canvas_diff = ROOT.TCanvas("c_{}".format(stack_name_diff))
     canvas_diff.cd()
     stack_diff.Draw("AP") # Is TMultiGraph, doesn't need "nostack"
@@ -239,15 +257,84 @@ class MuonAccValidator:
     stack_rel.GetXaxis().SetTitle(self.coords[0].name)
     stack_rel.GetYaxis().SetTitle("(N_{param}-N_{cut})/(N_{cut}-N_{cut,0})")
     
+    # Create a stacks for the 1D histograms of the deviation
+    stack_rel_1D = ROOT.THStack(stack_name_rel+"_1D", stack_name_rel+"_1D")
+    legend_rel_1D = ROOT.TLegend(0.2,0.4,0.5,0.9)
+    legend_rel_1D.SetHeader("Test val. in #Delta = {}".format(self.delta))
+    
+    stack_sig_1D = ROOT.THStack(stack_name_sig+"_1D", stack_name_sig+"_1D")
+    legend_sig_1D = ROOT.TLegend(0.5,0.4,0.9,0.9)
+    legend_sig_1D.SetHeader("Test val. in #Delta = {}".format(self.delta))
+    
+    # Find the minimum and maximum of the deviation measures for plotting
+    min_rel = min([min(arr or [0.0]) for arr in vals_rel])
+    max_rel = max([max(arr or [0.0]) for arr in vals_rel])
+    
+    max_sig = max([max(arr or [0.0]) for arr in vals_sig])
+    
+    # Plot the deviation-relevance distribution for each step in test-radius
+    for s in range(len(r_steps)-1):
+      r_min = r_steps[s]
+      r_max = r_steps[s+1]
+      step_label = "{} - {}".format(r_min, r_max)
+      
+      # Create the deviation histograms for this radius range
+      hist_name_rel = stack_name_rel + "_" + str(r_min) + "_" + str(r_max)
+      new_hist_rel = ROOT.TH1D(hist_name_rel,hist_name_rel,30,1.05*min_rel,1.05*max_rel)
+      
+      hist_name_sig = stack_name_sig + "_" + str(r_min) + "_" + str(r_max)
+      new_hist_sig = ROOT.TH1D(hist_name_sig,hist_name_sig,30,0.0,1.05*max_sig)
+      
+      # Fill the deviation histograms
+      for val_rel in vals_rel[s]: new_hist_rel.Fill(val_rel)
+      for val_sig in vals_sig[s]: new_hist_sig.Fill(val_sig)
+        
+      # Normalise
+      if new_hist_rel.Integral() > 0: new_hist_rel.Scale(1.0/new_hist_rel.Integral()) 
+      if new_hist_sig.Integral() > 0: new_hist_sig.Scale(1.0/new_hist_sig.Integral()) 
+        
+      # Plotting 
+      new_hist_rel.SetLineColor(r_colors[s])
+      stack_rel_1D.Add(new_hist_rel, "hist")
+      legend_rel_1D.AddEntry(new_hist_rel, step_label)
+      
+      new_hist_sig.SetLineColor(r_colors[s])
+      stack_sig_1D.Add(new_hist_sig, "hist")
+      legend_sig_1D.AddEntry(new_hist_sig, step_label)
+    
+    # Plot the 1D deviation distributions
+    canvas_rel_1D = ROOT.TCanvas("c_{}_1D".format(stack_name_rel))
+    canvas_rel_1D.cd()
+    stack_rel_1D.Draw("nostack")
+    stack_rel_1D.GetXaxis().SetTitle("(N_{param}-N_{cut})/(N_{cut}-N_{cut,0})")
+    stack_rel_1D.GetYaxis().SetTitle("a.u.")
+    stack_rel_1D.SetMinimum(0.0)
+    stack_rel_1D.SetMaximum(1.0)
+    legend_rel_1D.Draw()
+    legend_rel_1D.SetFillStyle(0) # Transparent legend-background
+    
+    canvas_sig_1D = ROOT.TCanvas("c_{}_1D".format(stack_name_sig))
+    canvas_sig_1D.cd()
+    stack_sig_1D.Draw("nostack")
+    stack_sig_1D.GetXaxis().SetTitle("|N_{param}-N_{cut}|/#sqrt{N_{cut}}")
+    stack_sig_1D.GetYaxis().SetTitle("a.u.")
+    stack_sig_1D.SetMinimum(0.0)
+    stack_sig_1D.SetMaximum(1.0)
+    legend_sig_1D.Draw()
+    legend_sig_1D.SetFillStyle(0) # Transparent legend-background
+    
     # Save the histogram
     for extension in extensions:
       # Create the plot subdirectory
       plot_subdir = "{}/plots/{}".format(output.dir,extension)
       OH.create_dir(plot_subdir)
       
-      # Save the histogram
+      # Save the histograms
       canvas_diff.Print("{}/{}.{}".format(plot_subdir, stack_name_diff, extension))
       canvas_sig.Print("{}/{}.{}".format(plot_subdir, stack_name_sig, extension))
       canvas_rel.Print("{}/{}.{}".format(plot_subdir, stack_name_rel, extension))
+      
+      canvas_rel_1D.Print("{}/{}_1D.{}".format(plot_subdir, stack_name_rel, extension))
+      canvas_sig_1D.Print("{}/{}_1D.{}".format(plot_subdir, stack_name_sig, extension))
 
 # ------------------------------------------------------------------------------
