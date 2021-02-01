@@ -105,11 +105,8 @@ def create_PrEW_input(input, output, coords, cuts,
   data = coef_matcher.add_coefs_to_data(output.distr_name, eM_chi, eP_chi, data)
 
   # Try extracting the differential coefficients for the muon acceptance box.
-  # Also validate the parametrisation.
   if muon_acc is not None:
     data = muon_acc.add_coefs_to_data(data)
-    sig_scale = 1000.0 * cross_section/n_total # Test using 1ab^-1 statistics
-    muon_acc_validator.validate(data, sig_scale, output, output_base_name)
 
   # Create a pandas dataframe
   df = pd.DataFrame(data)
@@ -127,8 +124,12 @@ def create_PrEW_input(input, output, coords, cuts,
 
   if muon_acc is not None:
     muon_acc.add_coefs_to_metadata(metadata)
+    muon_acc_validator.write_validation_data(data, output, output_base_name, 
+                                             metadata, n_total, cross_section)
 
+  # Attach the metadata to the data file
   metadata.write(file_path)
+  
   log.debug("Done with distribution.")
 
 # ------------------------------------------------------------------------------
