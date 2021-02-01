@@ -120,10 +120,10 @@ def create_PrEW_input(input, output, coords, cuts,
 
   # Attach metadata to beginning of file
   metadata = CSVM.CSVMetadata()
-  metadata.add("name", output.distr_name)
-  metadata.add("energy", input.energy)
-  metadata.add("e- chirality", eM_chi)
-  metadata.add("e+ chirality", eP_chi)
+  metadata["Name"] = output.distr_name
+  metadata["Energy"] = input.energy
+  metadata["e-Chirality"] = eM_chi
+  metadata["e+Chirality"] = eP_chi
 
   if muon_acc is not None:
     muon_acc.add_coefs_to_metadata(metadata)

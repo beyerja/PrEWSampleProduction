@@ -3,27 +3,16 @@ class CSVMetadata:
     """
     begin_marker = "#BEGIN-METADATA"
     end_marker = "#END-METADATA"
-
-    marker_map = {
-        "name": "Name",
-        "energy": "Energy",
-        "e- chirality": "e-Chirality",
-        "e+ chirality": "e+Chirality"
-    }
-    
     coef_marker = "Coef"
 
     def __init__(self):
         self.metadata = {}
 
-    def add(self, name, value):
-        """ Add the given attribute metadata.
-        """
-        if not name in self.marker_map.keys():
-            raise ValueError(
-                "Unknown attribute {}, only know {}.", self.marker_map[name], self.marker_map.keys())
-        else:
-            self.metadata[self.marker_map[name]] = value
+    def __setitem__(self, index, value):
+        self.metadata[index] = value
+
+    def __getitem__(self, index):
+        return self.metadata[index]
             
     def add_coef(self, base_name, coef_name, value):
         """ Add a global coefficient as metadata.
