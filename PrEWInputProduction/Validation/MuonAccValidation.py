@@ -5,6 +5,8 @@
 
 # ------------------------------------------------------------------------------
 
+from array import array
+import ctypes
 import logging as log
 from matplotlib import cm
 from matplotlib.colors import ListedColormap, LinearSegmentedColormap
@@ -48,18 +50,155 @@ def binned_muon_acc_factors(coef_data, delta_c, delta_w):
 
 # ------------------------------------------------------------------------------
 
+class SingleBinTest:
+  """ Class that for the calculation of validation measures for a single 
+      N-dimensional bin.
+  """
+  
+  def __init__(self, bin_center, val_cut, val_par, val_cut0):
+    """ val_cut  -> True influence of this cut
+        val_par  -> Influence as taken from the parametrisation
+        val_cut0 -> Value for the cut without varying the edges
+    """
+    self.bin_center = bin_center
+    self.val_cut = val_cut
+    self.val_par = val_par
+    self.val_cut0 = val_cut0
+        
+  def relative_deviation(self):
+    """ Return the relative deviation caused by the parametrisation.
+    """
+    return (self.val_par - self.val_cut) / self.val_cut if self.val_cut > 0 else 0
+    
+  def deviation_significance(self):
+    """ Return the (Poissonian) significance of deviation caused by the 
+        parametrisation.
+    """
+    return abs(self.val_par - self.val_cut) / np.sqrt(self.val_cut) if abs(self.val_cut) > 0 else 0
+    
+  def deviation_relevance(self):
+    """ Return the relevance of the deviation caused by the parametrisation.
+        Defined as the deviation relative to the cut-change.
+    """        
+    return (self.val_par - self.val_cut) / (self.val_cut - self.val_cut0) if abs(self.val_cut - self.val_cut0) > 0 else 0
+
+# ------------------------------------------------------------------------------
+
 class SingleCutTest:
-  """ Storage class for everything needed to test a single cut value.
+  """ Class for everything needed to test a single cut value.
   """
   
   def __init__(self, rdf, cut_val, delta_c, delta_w, costh_branch, distr_name, coords):
     rdf_filtered = rdf.Filter(SMA.get_ndim_costh_cut(cut_val, delta_c, delta_w, costh_branch))
     cut_distr_name = "{}_dc{}_dw{}".format(distr_name, delta_c, delta_w)
-    self.hist_ptr =  DH.get_hist_ptr(rdf_filtered, cut_distr_name, coords)
+    self.hist_cut_ptr = DH.get_hist_ptr(rdf_filtered, cut_distr_name, coords)
+    self.hist_cut = None
+    self.hist_par = None
+    self.dim = len(coords)
 
     self.delta_c = delta_c # Cut values
     self.delta_w = delta_w
+    
+    self.bin_tests = []
 
+  def evaluate(self, coef_data, hist_nocuts):
+    """ Evaluates the histograms of the test for both the actual cut and the
+        parametrisation of the cut.
+        Requires the coefficients and the histogram without cuts to calculate
+        the parametrised cut effect.
+    """
+    self.hist_cut = self.hist_cut_ptr.GetPtr()
+    
+    self.hist_par = hist_nocuts.Clone()
+    self.hist_par.SetName("{}_par".format(self.hist_cut.GetName()))
+    
+    # Get the factors that describe the result of the parametrisation
+    factors = binned_muon_acc_factors(coef_data, self.delta_c, self.delta_w)
+    
+    i = 0 # bin index not including under/over-flow
+    for bin in DH.get_bin_range(self.hist_cut):
+      # Skip overflow and underflow bins
+      if self.hist_cut.IsBinUnderflow(bin) or self.hist_cut.IsBinOverflow(bin): 
+        continue
+      
+      # Determine the factor for the bin (caused by the cut)  
+      factor = factors[i]
+      if factor > 1:
+        factor = 1
+      elif factor < 0:
+        factor = 0
+    
+      # Scale the current bin 
+      self.hist_par.SetBinContent(bin, factor*self.hist_par.GetBinContent(bin))
+      i += 1 # Increment bin index without under/over-flow
+    
+  def prepare_bin_tests(self, hist_cut0, sig_scale):
+    """ Prepare the needed measures by creating bin tests for every histogram 
+        bin.
+        hist_cut0 -> Histogram for cut without edge varying
+        sig_scale -> Scale applied to histogram values to get a useful lumi
+    """
+    for bin in range(hist_cut0.GetNcells()):
+      # Skip overflow and underflow bins
+      if hist_cut0.IsBinUnderflow(bin) or hist_cut0.IsBinOverflow(bin): 
+          continue
+          
+      # Find the axis-specific bin indices
+      bin_xyz = [ctypes.c_int(0) for d in range(3)]
+      hist_cut0.GetBinXYZ(bin,bin_xyz[0],bin_xyz[1],bin_xyz[2])
+      bin_xyz = [int(bin_d.value) for bin_d in bin_xyz]
+          
+      # Find the bin center value for each axis
+      bin_center = []
+      bin_center.append(hist_cut0.GetXaxis().GetBinCenter(bin_xyz[0]))
+      if self.dim > 1: 
+        bin_center.append(hist_cut0.GetYaxis().GetBinCenter(bin_xyz[1]))
+      if self.dim > 2:
+        bin_center.append(hist_cut0.GetZaxis().GetBinCenter(bin_xyz[2]))
+        
+      # Find all relevant result values
+      val_cut = self.hist_cut.GetBinContent(bin) * sig_scale
+      val_par = self.hist_par.GetBinContent(bin) * sig_scale
+      val_cut0 = hist_cut0.GetBinContent(bin) * sig_scale
+      self.bin_tests.append(SingleBinTest(np.array(bin_center), val_cut, val_par, val_cut0))
+      
+    self.bin_tests = np.array(self.bin_tests)
+    
+  def get_axis_graphs(self, axis):
+    """ Get the validation graphs for the given axis.
+    """
+    # Collect all the measures together with the relevant axis coordinate
+    # (Use explicit double arrays that ROOT can understand)
+    x = array('d')
+    y_dev = array('d')
+    y_sig = array('d')
+    y_rel = array('d')
+    for bin_test in self.bin_tests:
+      x.append(bin_test.bin_center[axis])
+      y_dev.append(bin_test.relative_deviation())
+      y_sig.append(bin_test.deviation_significance())
+      y_rel.append(bin_test.deviation_relevance())
+    
+    # Create the graphs that test the mistake made by the parametrisation
+    base_name = self.hist_cut.GetName()
+    
+    graph_dev = ROOT.TGraph(len(self.bin_tests), x, y_dev)
+    graph_dev.SetName("{}_g_dev".format(base_name))
+    graph_sig = ROOT.TGraph(len(self.bin_tests), x, y_sig)
+    graph_sig.SetName("{}_g_sig".format(base_name))
+    graph_rel = ROOT.TGraph(len(self.bin_tests), x, y_rel)
+    graph_rel.SetName("{}_g_rel".format(base_name))
+    
+    return { "dev": graph_dev, "sig": graph_sig, "rel": graph_rel }
+    
+  def get_all_measures(self):
+    """ Get the arrays with all the values for the measures for all the bins.
+    """
+    return {
+      "dev": np.array([test.relative_deviation() for test in self.bin_tests]),
+      "sig": np.array([test.deviation_significance() for test in self.bin_tests]),
+      "rel": np.array([test.deviation_relevance() for test in self.bin_tests]) }
+      
 # ------------------------------------------------------------------------------
 
 class MuonAccValidator:
@@ -140,48 +279,90 @@ class MuonAccValidator:
     """
 
     hist_nocuts = self.histptr_nocut.GetPtr()
-    hist_nocuts.Scale(sig_scale)
-    if not hist_nocuts.GetDimension() == 1:
-      log.error("Validation plots not implemented for histograms with dim != 1")
-      return
       
     # Find the histogram that has the cut without deviations
     hist_0_arr = [test for test in self.tests if (test.delta_c == 0 and test.delta_w == 0)]
     if not len(hist_0_arr) == 1:
       raise ValueError("Didn't find exactly one zero-cut array, found {}".format(len(hist_0_arr)))
-    hist_0 = hist_0_arr[0].hist_ptr.GetPtr()
-
-    # Create the stacks for the result checks
-    stack_name_base = "{}_stack".format(base_name)
-    stack_name_diff = "{}_rel_diff".format(stack_name_base)
-    stack_name_sig = "{}_sig".format(stack_name_base)
-    stack_name_rel = "{}_relevance".format(stack_name_base)
-
-    stack_diff = ROOT.TMultiGraph(stack_name_diff, stack_name_diff)
-    stack_sig = ROOT.THStack(stack_name_sig, stack_name_sig)
-    stack_rel = ROOT.TMultiGraph(stack_name_rel, stack_name_rel)
+    hist_0 = hist_0_arr[0].hist_cut_ptr.GetPtr()
     
+    # Evaluate all the tests
+    for test in self.tests:
+      test.evaluate(coef_data, hist_nocuts)
+      test.prepare_bin_tests(hist_0, sig_scale)
+      
+    # --------------------------------------------------------------------------
+    # Plotting of deviations for each axis
+
+    for d in range(len(self.coords)):
+      coord_name = self.coords[d].name
+
+      # Create the stacks for the result checks
+      stack_name_base = "{}_{}".format(base_name, coord_name)
+      stack_name_dev = "{}_dev".format(stack_name_base)
+      stack_name_sig = "{}_sig".format(stack_name_base)
+      stack_name_rel = "{}_rel".format(stack_name_base)
+      
+      stack_dev = ROOT.TMultiGraph(stack_name_dev, stack_name_dev)
+      stack_sig = ROOT.TMultiGraph(stack_name_sig, stack_name_sig)
+      stack_rel = ROOT.TMultiGraph(stack_name_rel, stack_name_rel)
+    
+      # Get all the individual graphs for the different checked cut points
+      for test in self.tests:
+        test_graphs = test.get_axis_graphs(d)
+        graph_dev = test_graphs["dev"]
+        graph_sig = test_graphs["sig"]
+        graph_rel = test_graphs["rel"]
+        
+        color = self.get_color_index(test.delta_c,test.delta_w)
+        graph_dev.SetMarkerColor(color)
+        graph_sig.SetMarkerColor(color)
+        graph_rel.SetMarkerColor(color)
+        
+        stack_dev.Add(graph_dev)
+        stack_sig.Add(graph_sig)
+        stack_rel.Add(graph_rel)
+        
+      # Draw and save the stacks
+      canvas_dev = ROOT.TCanvas("c_{}".format(stack_name_dev))
+      canvas_dev.cd()
+      stack_dev.Draw("AP")
+      stack_dev.GetXaxis().SetTitle(coord_name)
+      stack_dev.GetYaxis().SetTitle("(N_{param}-N_{cut})/N_{cut}")
+      
+      canvas_sig = ROOT.TCanvas("c_{}".format(stack_name_sig))
+      canvas_sig.cd()
+      stack_sig.Draw("AP")
+      stack_sig.GetXaxis().SetTitle(coord_name)
+      stack_sig.GetYaxis().SetTitle("|N_{param}-N_{cut}|/#sqrt{N_{cut}}")
+      
+      canvas_rel = ROOT.TCanvas("c_{}".format(stack_name_rel))
+      canvas_rel.cd()
+      stack_rel.Draw("AP")
+      stack_rel.GetXaxis().SetTitle(coord_name)
+      stack_rel.GetYaxis().SetTitle("(N_{param}-N_{cut})/(N_{cut}-N_{cut,0})")
+      
+      for extension in extensions:
+        # Create the plot subdirectory
+        plot_subdir = "{}/plots/{}".format(output.dir,extension)
+        OH.create_dir(plot_subdir)
+        
+        # Save the histograms
+        canvas_dev.Print("{}/{}.{}".format(plot_subdir, stack_name_dev, extension))
+        canvas_sig.Print("{}/{}.{}".format(plot_subdir, stack_name_sig, extension))
+        canvas_rel.Print("{}/{}.{}".format(plot_subdir, stack_name_rel, extension))
+        
+    # --------------------------------------------------------------------------
+    # Plotting of overall distribution of deviations  
+        
     # Arrays to track 1D distribution of deviations depending on the test radius
     r_steps = [ 0.0, 0.75, 1.5, 3.0, 5.5]
     r_colors = [self.get_color_index(r*self.delta,0) for r in [0.5, np.sqrt(2), 2.5, 5]]
     vals_sig = [[] for r in range(len(r_steps)-1)] # deviation-significance
     vals_rel = [[] for r in range(len(r_steps)-1)] # deviation-relevance
 
+    # Collect and correctly sort the validation measure values of all bins
     for test in self.tests:
-      hist = test.hist_ptr.GetPtr()
-      hist.Scale(sig_scale)
-      
-      # Create the histograms that test the mistake made by the parametrisation
-      hist_diff = hist_nocuts.Clone()
-      hist_diff.SetName("{}_rel_diff".format(hist.GetName()))
-      hist_sig = hist_nocuts.Clone()
-      hist_sig.SetName("{}_sig".format(hist.GetName()))
-      hist_rel = hist_nocuts.Clone()
-      hist_rel.SetName("{}_relevance".format(hist.GetName()))
-      
-      # Get the factors that describe the result of the parametrisation
-      factors = binned_muon_acc_factors(coef_data, test.delta_c, test.delta_w)
-      
       # Find the right radius-index to store the deviations in
       i_r = None
       d_tot = self.get_d_norm(test.delta_c, test.delta_w) * self.d_max
@@ -190,87 +371,29 @@ class MuonAccValidator:
           i_r = s
           break
       
-      i = 0 # bin index not including under/over-flow
-      for bin in DH.get_bin_range(hist):
-        # Skip overflow and underflow bins
-        if hist.IsBinUnderflow(bin) or hist.IsBinOverflow(bin): 
-          continue
-        
-        # Determine the factor for the bin (caused by the cut)  
-        factor = factors[i]
-        if factor > 1:
-          factor = 1
-        elif factor < 0:
-          factor = 0
-        
-        par_content = factor*hist_nocuts.GetBinContent(bin) 
-        true_content = hist.GetBinContent(bin)
-        cut0_content = hist_0.GetBinContent(bin)
-        
-        # Determine the relative difference caused by using the parametrisation
-        rel_diff = (par_content - true_content) / true_content if true_content > 0 else 0
-        hist_diff.SetBinContent(bin, rel_diff)
-        
-        # Detemine the significance of the difference
-        sig = abs(par_content - true_content) / np.sqrt(true_content) if abs(true_content) > 0 else 0
-        hist_sig.SetBinContent(bin, sig)
-        if true_content - cut0_content != 0:
+      # Collect all the validation measures
+      # -> Skip 0-values, happen only if no cut influence or no deviation from 
+      #    cut-change
+      test_dict = test.get_all_measures()
+      for sig in test_dict["sig"]:
+        if sig != 0:
           vals_sig[i_r].append(sig)
         
-        # Determine the relevance of the difference (compared to actual change of cut)
-        relevance = (par_content - true_content) / (true_content - cut0_content) if abs(true_content - cut0_content) > 0 else 0
-        hist_rel.SetBinContent(bin, relevance)
-        if true_content - cut0_content != 0:
-          vals_rel[i_r].append(relevance)
-        
-        i += 1 # Increment bin index without under/over-flow
-      
-      # Convert histogram to graf (because contains negative values)
-      graph_diff = ROOT.TGraph(hist_diff)
-      graph_rel = ROOT.TGraph(hist_rel)
-      
-      color = self.get_color_index(test.delta_c,test.delta_w)
-      graph_diff.SetMarkerColor(color)
-      hist_sig.SetLineColor(color)
-      graph_rel.SetMarkerColor(color)
-      
-      stack_diff.Add(graph_diff)
-      stack_sig.Add(hist_sig, "hist")
-      stack_rel.Add(graph_rel)
-    
-    # Draw and save the stacks
-    canvas_diff = ROOT.TCanvas("c_{}".format(stack_name_diff))
-    canvas_diff.cd()
-    stack_diff.Draw("AP") # Is TMultiGraph, doesn't need "nostack"
-    stack_diff.GetXaxis().SetTitle(self.coords[0].name)
-    stack_diff.GetYaxis().SetTitle("(N_{param}-N_{cut})/N_{cut}")
-    
-    canvas_sig = ROOT.TCanvas("c_{}".format(stack_name_sig))
-    canvas_sig.cd()
-    stack_sig.Draw("nostack")
-    stack_sig.GetXaxis().SetTitle(self.coords[0].name)
-    stack_sig.GetYaxis().SetTitle("|N_{param}-N_{cut}|/#sqrt{N_{cut}}")
-    
-    canvas_rel = ROOT.TCanvas("c_{}".format(stack_name_rel))
-    canvas_rel.cd()
-    stack_rel.Draw("AP")
-    stack_rel.GetXaxis().SetTitle(self.coords[0].name)
-    stack_rel.GetYaxis().SetTitle("(N_{param}-N_{cut})/(N_{cut}-N_{cut,0})")
-    
+      for rel in test_dict["rel"]:
+        if rel != 0:
+          vals_rel[i_r].append(rel)
+          
     # Create a stacks for the 1D histograms of the deviation
-    stack_rel_1D = ROOT.THStack(stack_name_rel+"_1D", stack_name_rel+"_1D")
+    stack_name_rel = "{}_rel".format(base_name)
+    stack_name_sig = "{}_sig".format(base_name)
+    
+    stack_rel_1D = ROOT.THStack(stack_name_rel, stack_name_rel)
     legend_rel_1D = ROOT.TLegend(0.2,0.4,0.5,0.9)
     legend_rel_1D.SetHeader("Test val. in #Delta = {}".format(self.delta))
     
-    stack_sig_1D = ROOT.THStack(stack_name_sig+"_1D", stack_name_sig+"_1D")
+    stack_sig_1D = ROOT.THStack(stack_name_sig, stack_name_sig)
     legend_sig_1D = ROOT.TLegend(0.5,0.4,0.9,0.9)
     legend_sig_1D.SetHeader("Test val. in #Delta = {}".format(self.delta))
-    
-    # Find the minimum and maximum of the deviation measures for plotting
-    min_rel = min([min(arr or [0.0]) for arr in vals_rel])
-    max_rel = max([max(arr or [0.0]) for arr in vals_rel])
-    
-    max_sig = max([max(arr or [0.0]) for arr in vals_sig])
     
     # Plot the deviation-relevance distribution for each step in test-radius
     for s in range(len(r_steps)-1):
@@ -280,10 +403,10 @@ class MuonAccValidator:
       
       # Create the deviation histograms for this radius range
       hist_name_rel = stack_name_rel + "_" + str(r_min) + "_" + str(r_max)
-      new_hist_rel = ROOT.TH1D(hist_name_rel,hist_name_rel,30,1.05*min_rel,1.05*max_rel)
+      new_hist_rel = ROOT.TH1D(hist_name_rel,hist_name_rel,51,-2.5,2.5)
       
       hist_name_sig = stack_name_sig + "_" + str(r_min) + "_" + str(r_max)
-      new_hist_sig = ROOT.TH1D(hist_name_sig,hist_name_sig,30,0.0,1.05*max_sig)
+      new_hist_sig = ROOT.TH1D(hist_name_sig,hist_name_sig,60,0.0,1.5)
       
       # Fill the deviation histograms
       for val_rel in vals_rel[s]: new_hist_rel.Fill(val_rel)
@@ -303,7 +426,7 @@ class MuonAccValidator:
       legend_sig_1D.AddEntry(new_hist_sig, step_label)
     
     # Plot the 1D deviation distributions
-    canvas_rel_1D = ROOT.TCanvas("c_{}_1D".format(stack_name_rel))
+    canvas_rel_1D = ROOT.TCanvas("c_{}".format(stack_name_rel))
     canvas_rel_1D.cd()
     stack_rel_1D.Draw("nostack")
     stack_rel_1D.GetXaxis().SetTitle("(N_{param}-N_{cut})/(N_{cut}-N_{cut,0})")
@@ -313,7 +436,7 @@ class MuonAccValidator:
     legend_rel_1D.Draw()
     legend_rel_1D.SetFillStyle(0) # Transparent legend-background
     
-    canvas_sig_1D = ROOT.TCanvas("c_{}_1D".format(stack_name_sig))
+    canvas_sig_1D = ROOT.TCanvas("c_{}".format(stack_name_sig))
     canvas_sig_1D.cd()
     stack_sig_1D.Draw("nostack")
     stack_sig_1D.GetXaxis().SetTitle("|N_{param}-N_{cut}|/#sqrt{N_{cut}}")
@@ -330,11 +453,7 @@ class MuonAccValidator:
       OH.create_dir(plot_subdir)
       
       # Save the histograms
-      canvas_diff.Print("{}/{}.{}".format(plot_subdir, stack_name_diff, extension))
-      canvas_sig.Print("{}/{}.{}".format(plot_subdir, stack_name_sig, extension))
-      canvas_rel.Print("{}/{}.{}".format(plot_subdir, stack_name_rel, extension))
-      
-      canvas_rel_1D.Print("{}/{}_1D.{}".format(plot_subdir, stack_name_rel, extension))
-      canvas_sig_1D.Print("{}/{}_1D.{}".format(plot_subdir, stack_name_sig, extension))
+      canvas_rel_1D.Print("{}/{}.{}".format(plot_subdir, stack_name_rel, extension))
+      canvas_sig_1D.Print("{}/{}.{}".format(plot_subdir, stack_name_sig, extension))
 
 # ------------------------------------------------------------------------------
