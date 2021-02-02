@@ -205,7 +205,7 @@ class MuonAccValidator:
       if dim > 1: 
         bin_center.append(hist_0.GetYaxis().GetBinCenter(bin_xyz[1]))
       if dim > 2:
-        bin_center.append(hist_0.GetYaxis().GetBinCenter(bin_xyz[2]))
+        bin_center.append(hist_0.GetZaxis().GetBinCenter(bin_xyz[2]))
       bin_centers.append(bin_center)
 
     # Attach metadata to beginning of file
