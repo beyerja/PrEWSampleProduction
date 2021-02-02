@@ -163,8 +163,8 @@ class MuonAccValidator:
       test.evaluate(coef_data, hist_nocuts)
       
       # Save the tested values
-      val_data["Delta-c"] = test.delta_c
-      val_data["Delta-w"] = test.delta_w
+      val_data["Delta-c"].append(test.delta_c)
+      val_data["Delta-w"].append(test.delta_w)
       
       # Get all the bin values from the histogram
       for i_bin in range(n_bins):
