@@ -48,6 +48,61 @@ def muon_acc_factor(coords, k_0, k_c, k_w, k_c2, k_w2, k_cw):
   return k_0 + k_c * delta_c + k_w * delta_w \
          + k_c2 * delta_c**2 + k_w2 * delta_w**2 \
          + k_cw * delta_c * delta_w 
+         
+# ------------------------------------------------------------------------------
+
+def get_exact_coefs(R, delta):
+  """ Exactly calculate the coefficients of the 2D quadratic polynomial by
+      solving the linear equation system for the 6 coefficients given 6 points.
+      The points:
+        # | delta_c [delta] | delta_w [delta]
+        0 |  0              |  0
+        1 |  0              |  2
+        2 |  0              | -2
+        3 |  0.5            |  2
+        4 | -0.5            | -2
+        5 |  1              | -2 
+      In addition, the value for delta is needed.
+  """
+  if (len(R) != 6):
+    raise ValueError("Need exactly 6 points to solve equation system, got {}.".format(len(R)))
+    
+  return [
+    R[0],
+    1.0/delta * ( - R[1] + R[2] + R[3] - R[4]),
+    1.0/(4.0*delta) * ( R[1] - R[2] ),
+    2.0/(3.0*delta**2) * ( -3.0 * R[2] + 2.0 * R[4] + R[5]),
+    1.0/(8.0*delta**2) * ( -2.0 * R[0] + R[1] + R[2]),
+    1.0/delta**2 * (-1.0/2.0 * R[1] + 1.0/2.0 * R[3] + 1.0/6.0 * R[4] - 1.0/6.0 * R[5])
+  ]
+  
+def get_fitted_coefs(cut_deltas, R, sigma, coefs_ini):
+  """ Perform fit to extract the coefficients of the 2D quadratic polynomial
+      using a wider array of points:
+      - First try to estimate an uncertainty on the bin values using the 
+        MC statistics uncertainty
+      - Check if that leads to a good initial chi^2, if not scale the 
+        uncertainties
+      - Then perform fit using all points
+      Needs:
+        cut_deltas ... cut deviation values for each point
+        R ... value at each point
+        sigma ... estimation of uncertainty on R at each point
+        coefs_ini ... initial guess for coefficients
+  """
+  # Determine fit starting point
+  R_prefit = muon_acc_factor(np.array(cut_deltas), coefs_ini[0], coefs_ini[1], coefs_ini[2], coefs_ini[3], coefs_ini[4], coefs_ini[5])
+  
+  # Check if sigma needs to be enlarged to get better behaved chi-squared
+  chi_sq_ndf = np.sum( ( ( R_prefit - np.array(R) ) / np.array(sigma) )**2 ) / (len(R) - len(coefs_ini))
+  if (chi_sq_ndf > 3) or ((chi_sq_ndf > 1e-15) and (chi_sq_ndf < 0.1)):
+    sigma = [ s * np.sqrt(chi_sq_ndf) for s in sigma ]
+      
+  # Perform fit
+  coefs, cov = opt.curve_fit(muon_acc_factor, cut_deltas, R, sigma=sigma, p0=coefs_ini)
+  return coefs
+
+# ------------------------------------------------------------------------------
 
 def get_coef_data(hist_nocut, hist_0, hist_1, hist_2, hist_3, hist_4, hist_5, 
                   delta, cut_deltas, hists):
@@ -62,15 +117,6 @@ def get_coef_data(hist_nocut, hist_0, hist_1, hist_2, hist_3, hist_4, hist_5,
         - original without any cut at all
         - 6 histograms with cuts at predetermined points to determine the
           polynomial coefficients.
-      The points:
-        # | delta_c [delta] | delta_w [delta]
-        0 |  0              |  0
-        1 |  0              |  2
-        2 |  0              | -2
-        3 |  0.5            |  2
-        4 | -0.5            | -2
-        5 |  1              | -2 
-      In addition, the value for delta is needed.
   """
   hists_ini = [hist_0, hist_1, hist_2, hist_3, hist_4, hist_5]
   
@@ -91,8 +137,9 @@ def get_coef_data(hist_nocut, hist_0, hist_1, hist_2, hist_3, hist_4, hist_5,
       continue
       
     N_nocut = hist_nocut.GetBinContent(bin)
+    
+    # Check if there are too few MC events to say anything about the behaviour
     if (N_nocut < 3.5):
-      # Got too few MC events to say anything about the behaviour
       k_0.append(1.0) # Constant term 1, all other 0
       for k in [k_c, k_w, k_c2, k_w2, k_cw]:
         k.append(0.0)
@@ -103,35 +150,25 @@ def get_coef_data(hist_nocut, hist_0, hist_1, hist_2, hist_3, hist_4, hist_5,
     R_ini = np.array([float(hist.GetBinContent(bin)) / N_nocut for hist in hists_ini])
     R = np.array([float(hist.GetBinContent(bin)) / N_nocut for hist in hists])
     
-    # Analytical calculation of initial guess for coefficients
-    initial_guess = []
-    initial_guess.append(R_ini[0])
-    initial_guess.append( 1.0/delta * ( - R_ini[1] + R_ini[2] + R_ini[3] - R_ini[4]) )
-    initial_guess.append( 1.0/(4.0*delta) * ( R_ini[1] - R_ini[2] ) )
-    initial_guess.append( 2.0/(3.0*delta**2) * ( -3.0 * R_ini[2] + 2.0 * R_ini[4] + R_ini[5]) )
-    initial_guess.append( 1.0/(8.0*delta**2) * ( -2.0 * R_ini[0] + R_ini[1] + R_ini[2]) )
-    initial_guess.append( 1.0/delta**2 * (-1.0/2.0 * R_ini[1] + 1.0/2.0 * R_ini[3] + 1.0/6.0 * R_ini[4] - 1.0/6.0 * R_ini[5]) )
+    # Check if the different points differ at all
+    if (np.all(R == R[0])):
+      # Set constant term to the value (equal for all), other terms to 0
+      k_0.append(R[0]) 
+      for k in [k_c, k_w, k_c2, k_w2, k_cw]:
+        k.append(0.0)
+      continue # No further calulcation necessary
     
-    # Now perform fit using wider array of points:
-    # - First try to estimate an uncertainty on the bin values using the 
-    #   MC statistics uncertainty
-    # - Check if that leads to a good initial chi^2, if not scale the 
-    #   uncertainties
-    # - Then perform fit using all points
-    sigma = []
+    # Analytical calculation of initial guess for coefficients
+    initial_guess = get_exact_coefs(R_ini, delta)
+    
+    # Now perform fit using wider array of points
+    sigma = [] # First get some uncertainty estimate on the ratios
     for hist in hists:
       if float(hist.GetBinContent(bin)) == 0:
         sigma.append(1.0/np.sqrt(N_nocut))
       else:
         sigma.append(np.sqrt(hist.GetBinContent(bin))/N_nocut)
-        
-    R_prefit = muon_acc_factor(np.array(cut_deltas), initial_guess[0], initial_guess[1], initial_guess[2], initial_guess[3], initial_guess[4], initial_guess[5])
-    chi_sq_ndf = np.sum( ( ( R_prefit - np.array(R) ) / np.array(sigma) )**2 ) / (len(R) - len(initial_guess))
-    if (chi_sq_ndf > 2) or ((chi_sq_ndf > 1e-15) and (chi_sq_ndf < 0.1)):
-      sigma = [ s * np.sqrt(chi_sq_ndf) for s in sigma ]
-        
-    # Perform fit
-    coefs, cov = opt.curve_fit(muon_acc_factor, cut_deltas, R, sigma=sigma, p0=initial_guess)
+    coefs = get_fitted_coefs(cut_deltas, R, sigma, initial_guess)
     
     # Extract final coefficients
     k_0.append( coefs[0] )
