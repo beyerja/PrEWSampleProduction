@@ -113,9 +113,9 @@ class MuonAccValidator:
       costh_branch = [costh_branch]
     
     # Delta-center, Delta-width combinations to test
-    self.dc_tests = [-5, -2.5, -1, -0.5, 0, 0.5, 1, 2.5, 5]
-    self.dw_tests = [-5, -2.5, -1, -0.5, 0, 0.5, 1, 2.5, 5]
-    self.d_max = 5 # Maximum dc+dw value that will be tested
+    self.dc_tests = [-4, -2, -1, -0.5, 0, 0.5, 1, 2, 4]
+    self.dw_tests = [-4, -2, -1, -0.5, 0, 0.5, 1, 2, 4]
+    self.d_max = 4 # Maximum dc+dw value that will be tested
     self.test_vals = []
     for dc in self.dc_tests:
       for dw in self.dw_tests:
