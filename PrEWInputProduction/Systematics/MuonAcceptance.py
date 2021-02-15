@@ -315,7 +315,7 @@ class MuonAccParametrisation:
 def default_acc_cut():
   """ Define the default acceptance cut for the muon acceptance box.
   """
-  return 0.95
+  return 0.9925 # ~ 7 degrees
 
 def default_delta():
   """ Define the default delta variation used to calculate the cut dependence.
