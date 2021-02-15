@@ -11,6 +11,7 @@ import pandas as pd
 import sys
 
 # Local modules
+import Conventions as Conv
 sys.path.append("../IO")
 import CSVMetadata as CSVM
 sys.path.append("../RKHelp")
@@ -21,6 +22,8 @@ import DistrPlotting as DP
 sys.path.append("../Systematics")
 import MuonAcceptance as SMA
 import SystematicsOptions as SSO
+sys.path.append("../Validation")
+import MuonAccValidation as MAV
 
 # ------------------------------------------------------------------------------
 
@@ -53,10 +56,14 @@ def create_PrEW_input(input, output, coords, cuts,
 
   # Prepare the muon acceptance box if requested
   muon_acc = None
+  muon_acc_validator = None
   if syst.use_muon_acc:
     muon_acc_cut = SMA.default_acc_cut()
-    muon_acc = SMA.MuonAccParametrisation(rdf_after_cuts, muon_acc_cut, 0.001, 
+    delta = SMA.default_delta()
+    muon_acc = SMA.MuonAccParametrisation(rdf_after_cuts, muon_acc_cut, delta, 
                                           syst.costh_branch, output.distr_name, coords)
+    muon_acc_validator = MAV.MuonAccValidator(rdf_after_cuts, muon_acc_cut, delta, 
+                                              syst.costh_branch, output.distr_name, coords)
 
   # ----------------------- Trigger RDF operations -----------------------------
   log.debug("Triggering RDataFrame operations.")
@@ -73,8 +80,8 @@ def create_PrEW_input(input, output, coords, cuts,
       output.distr_name, n_total, n_after_cuts, n_after_cuts/n_total*100.0))
 
   # Base for output file name
-  output_base_name = DH.get_distr_filebase(output.distr_name, input.energy, 
-                                           eM_chi, eP_chi)
+  output_base_name = Conv.csv_file_name(output.distr_name, input.energy, 
+                                      eM_chi, eP_chi)
   output_base = "{}/{}".format(output.dir, output_base_name)
 
   # Correctly normalize the histogram
@@ -84,6 +91,8 @@ def create_PrEW_input(input, output, coords, cuts,
   if (output.create_plots):
     log.debug("Create histogram plot.")
     DP.draw_hist(hist, output, output_base_name)
+    if muon_acc is not None:
+      muon_acc.plot_cut_result(output, output_base_name)
 
   # ----------------------- Producing PrEW input -------------------------------
   log.debug("Start producing PrEW input.")
@@ -95,7 +104,7 @@ def create_PrEW_input(input, output, coords, cuts,
   coef_matcher = RKCM.default_coef_matcher()
   data = coef_matcher.add_coefs_to_data(output.distr_name, eM_chi, eP_chi, data)
 
-  # Try extracting the differential coefficients for the muon acceptance box
+  # Try extracting the differential coefficients for the muon acceptance box.
   if muon_acc is not None:
     data = muon_acc.add_coefs_to_data(data)
 
@@ -108,15 +117,19 @@ def create_PrEW_input(input, output, coords, cuts,
 
   # Attach metadata to beginning of file
   metadata = CSVM.CSVMetadata()
-  metadata.add("name", output.distr_name)
-  metadata.add("energy", input.energy)
-  metadata.add("e- chirality", eM_chi)
-  metadata.add("e+ chirality", eP_chi)
+  metadata["Name"] = output.distr_name
+  metadata["Energy"] = input.energy
+  metadata["e-Chirality"] = eM_chi
+  metadata["e+Chirality"] = eP_chi
 
   if muon_acc is not None:
     muon_acc.add_coefs_to_metadata(metadata)
+    muon_acc_validator.write_validation_data(data, output, output_base_name, 
+                                             metadata, n_total, cross_section)
 
+  # Attach the metadata to the data file
   metadata.write(file_path)
+  
   log.debug("Done with distribution.")
 
 # ------------------------------------------------------------------------------
