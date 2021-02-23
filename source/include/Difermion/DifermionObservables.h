@@ -14,11 +14,11 @@ struct DifermionObservables {
   // Observables in the ee rest frame
   // -> Detector coordinate system (expecting no significant x-y boost)
   double costh_f_star{};
-  double m_ff{};
 
   // Observables in detector rest frame
   double costh_f{};
   double costh_fbar{};
+  double m_ff{};
 
   void reset() {
     /** Reset all observables to their default value.
