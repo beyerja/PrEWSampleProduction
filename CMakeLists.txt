@@ -28,17 +28,17 @@ INCLUDE_DIRECTORIES( SYSTEM ${MarlinUtil_INCLUDE_DIRS} )
 LINK_LIBRARIES( ${MarlinUtil_LIBRARIES} )
 ADD_DEFINITIONS( ${MarlinUtil_DEFINITIONS} )
 
-FIND_PACKAGE( ROOT REQUIRED ) 
+FIND_PACKAGE( ROOT REQUIRED )
 INCLUDE_DIRECTORIES( SYSTEM ${ROOT_INCLUDE_DIRS} )
 LINK_LIBRARIES( ${ROOT_LIBRARIES} )
 ADD_DEFINITIONS( ${ROOT_DEFINITIONS} )
 
 # Custom libraries
-set(MarlinHelp_dir /afs/desy.de/group/flc/pool/beyerjac/TGCAnalysis/SampleProduction/MarlinAnalysis/MarlinHelp)
-find_library( 
-  MarlinHelp MarlinHelp 
+set(MarlinHelp_dir /afs/desy.de/group/flc/pool/beyerjac/TGCAnalysis/SampleProduction/MCProduction/MarlinHelp)
+find_library(
+  MarlinHelp MarlinHelp
   HINTS ${MarlinHelp_dir}/lib/MarlinHelp
-  REQUIRED 
+  REQUIRED
 )
 include_directories(${MarlinHelp_dir}/include)
 
