@@ -97,7 +97,7 @@ private:
   void extract_observables(const EVENT::MCParticleVec &mcps);
   void extract_lab_observables(const EVENT::MCParticle &f,
                                const EVENT::MCParticle &fbar);
-  void extract_ee_observables(const EVENT::MCParticle &f,
+  void extract_ff_observables(const EVENT::MCParticle &f,
                               const EVENT::MCParticle &fbar);
 };
 
