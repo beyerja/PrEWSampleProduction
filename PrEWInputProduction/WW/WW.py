@@ -38,8 +38,8 @@ def main():
 
     # Coordinates
     coords = [
-        DH.Coordinate("costh_Wminus_star", 20, -0.9695290858725761, 0.9695290858725761),
-        DH.Coordinate("costh_l_star", 10, -0.925925925925926, 0.925925925925926),
+        DH.Coordinate("costh_Wminus_star", 20, -1.0, 1.0),
+        DH.Coordinate("costh_l_star", 10, -1.0, 1.0),
         DH.Coordinate("phi_l_star", 10, -math.pi, math.pi),
     ]
 

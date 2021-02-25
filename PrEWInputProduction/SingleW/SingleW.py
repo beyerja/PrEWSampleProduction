@@ -42,9 +42,9 @@ def main():
 
     # Coordinates
     coords = [
-        DH.Coordinate("costh_Whad_star", 20, -0.9695290858725761, 0.9695290858725761),
-        DH.Coordinate("costh_e_star", 10, -0.925925925925926, 0.925925925925926),
-        DH.Coordinate("m_enu", 20, 4.037857055, 165.55213928499998),
+        DH.Coordinate("costh_Whad_star", 20, -1.0, 1.0),
+        DH.Coordinate("costh_e_star", 10, -1.0, 1.0),
+        DH.Coordinate("m_enu", 20, 0.0, 240.0) # in Data min and max are 0.118263 and 238.599915 
     ]
 
     # Create distributions for opposite-sign chiralities (both charges)
