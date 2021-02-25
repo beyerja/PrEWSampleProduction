@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "#########################################################################"
-echo "### Loading needed software versions ####################################" 
+echo "### Loading needed software versions ####################################"
 echo "#########################################################################"
 
 # Load the config to determine the iLCSoft version
@@ -15,10 +15,10 @@ elif [ ! -z "${ILCSOFT}" ]; then
   echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
   echo "ERROR: Another iLCSoft version is already loaded!"
   echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-else 
+else
   echo "Loading iLCSoft - version: ${ilcsoft_version}"
   source ${ilcsoft_dir}/init_ilcsoft.sh
 fi
 
 # Add the MarlinHelp package path
-export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/afs/desy.de/group/flc/pool/beyerjac/TGCAnalysis/SampleProduction/MarlinAnalysis/MarlinHelp/lib
+export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/afs/desy.de/group/flc/pool/beyerjac/TGCAnalysis/SampleProduction/PrEWSampleProduction/MarlinHelp/lib

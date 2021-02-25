@@ -34,6 +34,6 @@ void DifermionProcessor::extract_observables(const EVENT::MCParticleVec &mcps) {
   // Extract observables in detector rest frame
   this->extract_lab_observables(*f, *fbar);
 
-  // Extract observables in ee rest frame
-  this->extract_ee_observables(*f, *fbar);
+  // Extract observables in ffbar rest frame
+  this->extract_ff_observables(*f, *fbar);
 }
