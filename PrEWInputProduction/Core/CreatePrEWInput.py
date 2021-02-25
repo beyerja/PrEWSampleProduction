@@ -14,8 +14,6 @@ import sys
 import Conventions as Conv
 sys.path.append("../IO")
 import CSVMetadata as CSVM
-sys.path.append("../RKHelp")
-import RKCoefMatcher as RKCM
 sys.path.append("../ROOTHelp")
 import DistrHelpers as DH
 import DistrPlotting as DP
@@ -99,10 +97,6 @@ def create_PrEW_input(input, output, coords, cuts,
 
   # Extract bin centers and cross sections from the histogram
   data = DH.get_data(hist, coords)
-
-  # Try to find coefficients from RK distribution
-  coef_matcher = RKCM.default_coef_matcher()
-  data = coef_matcher.add_coefs_to_data(output.distr_name, eM_chi, eP_chi, data)
 
   # Try extracting the differential coefficients for the muon acceptance box.
   if muon_acc is not None:
