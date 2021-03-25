@@ -14,5 +14,6 @@ void DifermionProcessor::extract_lab_observables(
   m_observables.costh_f = f_tlv_lab.CosTheta();
   m_observables.costh_fbar = fbar_tlv_lab.CosTheta();
   m_observables.m_ff = ffbar_tlv_lab.M();
+  m_observables.pz_ff = ffbar_tlv_lab.Pz();
   // ---------------------------------------------------------------------------
 }

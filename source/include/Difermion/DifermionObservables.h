@@ -19,6 +19,7 @@ struct DifermionObservables {
   double costh_f{};
   double costh_fbar{};
   double m_ff{};
+  double pz_ff{};
 
   void reset() {
     /** Reset all observables to their default value.
@@ -26,6 +27,7 @@ struct DifermionObservables {
     f_pdg = 0;
     costh_f_star = 9e9;
     m_ff = 9e9;
+    pz_ff = 9e9;
     costh_f = 9e9;
     costh_fbar = 9e9;
   }
