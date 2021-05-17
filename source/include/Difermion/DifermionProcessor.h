@@ -99,6 +99,10 @@ private:
                                const EVENT::MCParticle &fbar);
   void extract_ff_observables(const EVENT::MCParticle &f,
                               const EVENT::MCParticle &fbar);
+  void extract_ff_true_observables(const EVENT::MCParticle &f,
+                                   const EVENT::MCParticle &fbar,
+                                   const EVENT::MCParticle &eM_after_ISR,
+                                   const EVENT::MCParticle &eP_after_ISR);
 };
 
 #endif
