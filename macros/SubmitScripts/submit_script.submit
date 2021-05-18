@@ -13,4 +13,7 @@ log                 = $(log_dir)/$(Cluster).$(Process).log
 # for each job. Remember that regular filesystem rules about maximum files in a directory and maximum filesizes apply (warning)
 # htcondor will (as any other batchsystem) not create any directories for you, hence these need to exist.
 
+# Specify the operating system
+Requirements = ( OpSysAndVer == "CentOS7" ) 
+
 queue

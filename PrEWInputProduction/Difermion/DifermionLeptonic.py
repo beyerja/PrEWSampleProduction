@@ -89,6 +89,19 @@ def main():
           input = input, coords = coords, 
           output = OH.OutputInfo( output_dir, distr_name = distr_name, create_plots = create_plots), 
           cuts = distr_cuts)
+          
+    # --- Muons with true angle and no systematics -----------------------------
+    output_dir = "/nfs/dust/ilc/group/ild/beyerjac/TGCAnalysis/SampleProduction/NewMCProduction/2f_Z_l/PrEWInput/TrueAngle"
+    coords = [ DH.Coordinate("costh_f_star_true", 20, -1.0, 1.0) ]
+
+    for input in inputs:
+      for cut_name, cuts in cut_dict.items():
+        distr_name = "2f_mu_{}_true".format(cut_name)
+        distr_cuts = "(f_pdg == 13) && {}".format(cuts)
+        CPI.create_PrEW_input(
+          input = input, coords = coords, 
+          output = OH.OutputInfo( output_dir, distr_name = distr_name, create_plots = False), 
+          cuts = distr_cuts)      
     
     print("Done.")
 

@@ -36,4 +36,9 @@ void DifermionProcessor::extract_observables(const EVENT::MCParticleVec &mcps) {
 
   // Extract observables in ffbar rest frame
   this->extract_ff_observables(*f, *fbar);
+
+  // --- Observables using truth level information that can't be reconstructed
+  auto eM_after_ISR = Utils::MC::incoming_eM_after_ISR(mcps);
+  auto eP_after_ISR = Utils::MC::incoming_eP_after_ISR(mcps);
+  this->extract_ff_true_observables(*f, *fbar, *eM_after_ISR, *eP_after_ISR);
 }

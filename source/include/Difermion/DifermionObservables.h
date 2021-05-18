@@ -11,9 +11,12 @@ struct DifermionObservables {
   // Boost-independent observables
   int f_pdg{};
 
-  // Observables in the ee rest frame
+  // Observables in the ffbar rest frame
   // -> Detector coordinate system (expecting no significant x-y boost)
   double costh_f_star{};
+  
+  // Observables in cheated ffbar frame assuming ISR to be known exactly
+  double costh_f_star_true{};
 
   // Observables in detector rest frame
   double costh_f{};
@@ -26,6 +29,7 @@ struct DifermionObservables {
      **/
     f_pdg = 0;
     costh_f_star = 9e9;
+    costh_f_star_true = 9e9;
     m_ff = 9e9;
     pz_ff = 9e9;
     costh_f = 9e9;
