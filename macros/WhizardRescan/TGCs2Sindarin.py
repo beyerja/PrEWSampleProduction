@@ -35,6 +35,11 @@ def get_cTGC_sindarin(g1z_ka_la_points):
   sindarin_str = sindarin_str[:-3] # Remove last ",{\n"
   
   return sindarin_str
+  
+def bash_safeguard(s):
+  """ Safeguard the given string for usage in bash.
+  """
+  return s.replace("\n","\\n")
     
 def main():
   description = """
@@ -50,7 +55,7 @@ def main():
   
   g1z_ka_la_points = get_g1z_ka_la_points(dev_points,dev_scale)
   
-  print(get_cTGC_sindarin(g1z_ka_la_points))
+  print(bash_safeguard(get_cTGC_sindarin(g1z_ka_la_points)))
 
 if __name__ == "__main__":
   main()
