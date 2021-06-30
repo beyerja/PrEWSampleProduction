@@ -108,7 +108,6 @@ for e_pol in "${e_polarizations[@]}"; do
     fi
     
     for rescan_subdir in ${rescan_topdir}/*/; do
-      echo ${rescan_subdir}
       # The command to be executed: 
       # Load the needed software and start the rescan
       command_string="cd ${dir}/.. \&\& . load_env.sh \&\& cd ${rescan_subdir} \&\& whizard ${process}_rescan.sin \&\& cd ${dir}"
