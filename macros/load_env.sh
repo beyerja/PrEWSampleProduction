@@ -24,7 +24,7 @@ fi
 export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/afs/desy.de/group/flc/pool/beyerjac/TGCAnalysis/SampleProduction/PrEWSampleProduction/MarlinHelp/lib
 
 # Load WHIZARD
-if [[ "${LD_LIBRARY_PATH}" == *"${ilcsoft_dir}"* ]]; then
+if [[ "${LD_LIBRARY_PATH}" == *"${whizard_dir}"* ]]; then
   echo "WHIZARD is already loaded."
 else
   echo "Loading WHIZARD"
