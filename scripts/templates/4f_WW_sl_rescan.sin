@@ -1,0 +1,177 @@
+! ========== 
+! This script/template is largely adapted from Mikaels scripts for the ILC-250 
+! production.
+! The upper case TOKEN's are replaced later by the relevant information.
+! ========== 
+
+! ------------------------ Sample production setup -----------------------------
+sqrts = 250 GeV
+
+beams = e1,  E1  => circe2 => isr,isr  
+$circe2_file="/nfs/dust/ilc/user/berggren/whizard_2.8-prod/whizard-2.8.5-plain/energy_spread/250_SetA_ee024.circe"  
+
+beams_pol_density = BEAM_CHIRALITY_TOKEN
+
+
+?isr_handler = true 
+?epa_handler = false  
+
+model = SM_ac_CKM ! different model for rescanning
+?resonance_history = true 
+resonance_on_shell_limit = 16
+resonance_on_shell_turnoff = 2
+
+! ------------------------------------------------------------------------------
+! Aliases
+! ------------------------------------------------------------------------------
+alias electrons = e1:E1
+alias mus = e2:E2
+alias taus = e3:E3
+alias quark = u:d:s:c:b:U:D:S:C:B
+alias up_type_q = u:c:U:C
+alias down_type_q = d:s:b:D:S:B
+alias lepton = e1:e2:e3:E1:E2:E3
+alias not_electron = e2:e3:E2:E3
+alias neutrino = n1:n2:n3:N1:N2:N3   
+
+! ------------------------------------------------------------------------------
+! Cuts
+! ------------------------------------------------------------------------------
+real default_M_cut = 4 GeV
+! (the following is for DBD comparision (m_mu was 0 for non-ee processes, hence a 4 GeV cut))
+real mumu_M_cut = 0 GeV
+alias all_massless_but_electron=quark:not_electron
+real default_jet_cut = 10 GeV
+real default_E_cut = 10 GeV
+real default_Q_cut = 4 GeV
+!
+alias masslessquark=quark
+!
+cuts =
+ let subevt @non_bmrem_electron = [ select if Index > 1 [e1] ] 
+ in
+ let subevt @non_bmrem_positron = [ select if Index > 1 [E1] ] 
+ in
+ let subevt @non_bmrem_both = [ select if Index > 2 [e1:E1] ] 
+ in
+ let subevt @non_isr_photon = [ select if Index > 2 [A] ] 
+  in 
+   all M > mumu_M_cut [e2,E2]
+  and
+   all M > default_jet_cut [masslessquark,masslessquark]
+  and
+    all E > default_E_cut [@non_isr_photon]
+  and
+   all M < - default_Q_cut [incoming e1, [ @non_isr_photon]]
+  and
+   all M < - default_Q_cut [incoming E1, [ @non_isr_photon]]
+  and
+   all M < - default_Q_cut [incoming e1, e1]
+  and
+   all M < - default_Q_cut [incoming E1, E1]
+  and
+   all M > default_M_cut [e1,E1]
+  and
+   all M < - default_Q_cut [incoming photon , e1:E1 ]
+  and
+   all M < - default_Q_cut [incoming photon , all_massless_but_electron ]
+  and
+   all M < - default_Q_cut [incoming photon , @non_isr_photon ]
+
+! ------------------------------------------------------------------------------
+! Process input
+! ------------------------------------------------------------------------------
+polarized e1, e2 , e3, u, d, c, s, t, n1, n2, n3, E1, E2, E3, U, D, C, S, T, N1, N2, N3, "W+", "W-", Z, A
+
+! ------------------------------------------------------------------------------
+! Parameter input
+! ------------------------------------------------------------------------------
+! masses not set here are at their PDG values, including e and mu
+! All quark masses are zero, or are set to zero here, to
+! allow for flavour sums
+ ms = 0
+ mc = 0
+ mb = 0
+
+! No higgs in the general SM samples, to avoid double
+! counting with the dedicated higgs samples:
+ $restrictions = "!H"
+
+! no gluons in Whizard, to avoid double-counting with Pythia-PS : 
+ alphas = 1.e-6
+
+! ------------------------------------------------------------------------------
+! Simulation input
+! ------------------------------------------------------------------------------
+?keep_remnants = true
+?keep_beams = true
+?hadronization_active = true
+!
+$extension_stdhep_ev4 = "stdhep"
+
+! OPAL tune:
+$ps_PYTHIA_PYGIVE = "MSTJ(28)=0; PMAS(25,1)=125.; PMAS(25,2)=0.3605E-02; PMAS(116,1)=0.493677 ; MSTJ(41)=2; MSTU(22)=2000; PARJ(21)=0.40000; PARJ(41)=0.11000; PARJ(42)=0.52000; PARJ(81)=0.25000; PARJ(82)=1.90000; MSTJ(11)=3; PARJ(54)=-0.03100; PARJ(55)=-0.00200; PARJ(1)=0.08500; PARJ(3)=0.45000; PARJ(4)=0.02500; PARJ(2)=0.31000; PARJ(11)=0.60000; PARJ(12)=0.40000; PARJ(13)=0.72000; PARJ(14)=0.43000; PARJ(15)=0.08000; PARJ(16)=0.08000; PARJ(17)=0.17000;   MSTP(125)=2; MSTP(3)=1;MSTP(71)=1"
+?ps_fsr_active = true
+$shower_method = "PYTHIA6"
+
+?ps_taudec_active = true
+! 0=all, 1=e, 2=mu, 3=pi, 4=rho, 5=a_1, ....
+ps_tauola_dec_mode1 = 0
+ps_tauola_dec_mode2 = 0
+
+! ------------------------------------------------------------------------------
+! Beam settings
+! ------------------------------------------------------------------------------
+?isr_recoil = false
+$isr_handler_mode = "recoil"
+isr_alpha = 0.0072993
+isr_mass = 0.000511
+epa_alpha = 0.0072993
+epa_mass =  0.000511
+epa_q_max = 4. 
+epa_q_min = 0.1
+epa_x_min = 0.00001
+?epa_recoil=false
+$epa_handler_mode = "recoil"
+
+!  (beam-spectrum part)
+$circe2_design="ILC"
+!   NB: this is a bit confusing: It *should* be false, even if beams are
+!   polarised. It is a place-holder for a future development when polarisation
+!   is taken into account by GuineaPig 
+?circe2_polarized = false
+
+beams_pol_fraction = 1.0,1.0
+
+! ------------------------------------------------------------------------------
+! Processes 
+! ------------------------------------------------------------------------------
+int nf = 4
+int ng = 0
+
+!! #    ----  Semi-leptonic
+!! #      WW : qq l nu
+process ww_sl0 =     e1,E1 => (up_type_q,down_type_q,taus,neutrino) + (up_type_q,down_type_q,mus,neutrino) { $omega_flags =  "-model:constant_width"
+                                                                     process_num_id = PROCESS_ID_TOKEN }      
+
+! ------------------------------------------------------------------------------
+
+compile
+
+! ------------------------ Rescanning test -------------------------------------
+
+?resonance_history = false
+
+! Enable updating of matrix element and weight for event (exactly wanted)
+?update_sqme = true
+?update_weight = false
+
+rescan "INPUT_PATH_TOKEN" (ww_sl0) {
+ $rescan_input_format = "lcio"
+ $sample = "cTGC_rescan"
+ sample_format = weight_stream
+ ?recover_beams = false ! Avoid error from trying to recover the beam
+ ?write_raw = false
+
+ alt_setup = TGC_POINTS_TOKEN
+}
