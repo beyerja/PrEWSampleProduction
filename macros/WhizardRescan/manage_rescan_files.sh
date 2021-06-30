@@ -102,10 +102,6 @@ template_path=${scripts_dir}/templates/${template_name}
 process_output_directory=${output_base}/${process} # output_base from config
 rescan_topdir=${process_output_directory}/WhizardRescan/${e_pol}${p_pol}
 
-if [[ ! -d ${rescan_topdir} ]] ; then # Create if not existing
-  mkdir -p ${rescan_topdir}
-fi
-
 # ------------------------------------------------------------------------------
 # Perform the requested action
 
@@ -123,12 +119,13 @@ if  [[ ${action} == "set" ]]; then
   # according to convention of DST file naming and print complete paths (->`pwd`).
   files=$(find `pwd` -iname "*P${process}*${e_pol}.${p_pol}*.slcio" -print)
   
+  if [[ $files == "" ]]; then
+    exit 1 # If empty no file found -> exit subprocess
+  fi
+  
   cd ${rescan_topdir}
   
   for file in ${files[@]}; do
-    if [[ $file == "" ]]; then
-      exit 1 # If empty no file found -> exit subprocess
-    fi
   
     file_number=$(python ${dir}/InterpretFilename.py --file ${file} --file-number)
     file_subdir=${rescan_topdir}/${file_number}
