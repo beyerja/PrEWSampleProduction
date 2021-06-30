@@ -22,3 +22,12 @@ fi
 
 # Add the MarlinHelp package path
 export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/afs/desy.de/group/flc/pool/beyerjac/TGCAnalysis/SampleProduction/PrEWSampleProduction/MarlinHelp/lib
+
+# Load WHIZARD
+if [[ "${LD_LIBRARY_PATH}" == *"${ilcsoft_dir}"* ]]; then
+  echo "WHIZARD is already loaded."
+else
+  echo "Loading WHIZARD"
+  export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${whizard_dir}/install/lib
+  export PATH=${PATH}:${noweb_path}:${whizard_dir}/install/bin
+fi
