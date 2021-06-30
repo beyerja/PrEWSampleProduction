@@ -123,6 +123,9 @@ if  [[ ${action} == "set" ]]; then
     exit 1 # If empty no file found -> exit subprocess
   fi
   
+  if [[ ! -d ${rescan_topdir} ]] ; then # Create if not existing
+    mkdir -p ${rescan_topdir}
+  fi
   cd ${rescan_topdir}
   
   for file in ${files[@]}; do
