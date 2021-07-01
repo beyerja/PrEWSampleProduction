@@ -20,6 +20,10 @@ case $i in
     action="set"
     shift # past argument=value
   ;;
+  --print-topdir)
+    action="print"
+    shift # past argument=value
+  ;;
   --clean-up)
     action="clean"
     shift # past argument=value
@@ -105,7 +109,7 @@ rescan_topdir=${process_output_directory}/WhizardRescan/${e_pol}${p_pol}
 # ------------------------------------------------------------------------------
 # Perform the requested action
 
-if  [[ ${action} == "set" ]]; then
+if [[ ${action} == "set" ]] || [[ ${action} == "print" ]]; then
   # Check if all necessary configs are given
   if [ "$tgc_config" = false ]; then
     >&2 echo "No TGC config given!"; exit 1
@@ -123,27 +127,29 @@ if  [[ ${action} == "set" ]]; then
     exit 1 # If empty no file found -> exit subprocess
   fi
   
-  if [[ ! -d ${rescan_topdir} ]] ; then # Create if not existing
-    mkdir -p ${rescan_topdir}
-  fi
-  cd ${rescan_topdir}
-  
-  for file in ${files[@]}; do
-  
-    file_number=$(python ${dir}/InterpretFilename.py --file ${file} --file-number)
-    file_subdir=${rescan_topdir}/${file_number}
-  
-    if [[ ! -d ${file_subdir} ]] ; then # Create if not existing
-      mkdir -p ${file_subdir}
+  if [[ ${action} == "set" ]]; then
+    # Setup up the rescan scripts if that was requested
+    if [[ ! -d ${rescan_topdir} ]] ; then # Create if not existing
+      mkdir -p ${rescan_topdir}
     fi
-  
-    cp ${template_path} ${file_subdir}/.
-    ${dir}/configure_script.sh --script-path=${file_subdir}/${template_name} --input-file=${file} --tgc-config=${tgc_config} --tgc-points-file=${tgc_points_file}
-  done
-  
-  if [[ $files != "" ]]; then
-    echo ${rescan_topdir} # Echo the top level dir if any files where found
+    cd ${rescan_topdir}
+    
+    for file in ${files[@]}; do
+    
+      file_number=$(python ${dir}/InterpretFilename.py --file ${file} --file-number)
+      file_subdir=${rescan_topdir}/${file_number}
+    
+      if [[ ! -d ${file_subdir} ]] ; then # Create if not existing
+        mkdir -p ${file_subdir}
+      fi
+    
+      cp ${template_path} ${file_subdir}/.
+      ${dir}/configure_script.sh --script-path=${file_subdir}/${template_name} --input-file=${file} --tgc-config=${tgc_config} --tgc-points-file=${tgc_points_file}
+    done
   fi
+  
+  echo ${rescan_topdir}
+  
 elif [[ ${action} == "clean" ]]; then
   rm -f ${rescan_topdir}/*/{default_*,*.mod,*.f90,*.lo,*.o,*.la,*.makefile,*.phs} 
 else   

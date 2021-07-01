@@ -7,6 +7,7 @@ input_config=false
 output_config=false
 tgc_config=false
 tgc_points_file=false
+failed_only=false
 
 # ------------------------------------------------------------------------------
 # Read input
@@ -33,9 +34,14 @@ case $i in
     tgc_points_file="${i#*=}"
     shift # past argument=value
   ;;
-  -h|--help)
-    echo "usage: ./rescan_single_process.sh --process=[4f_WW_sl/4f_sW_sl/...] --input-config=[...] --output-config=[...] --tgc-config=[...] --tgc-points-file=[...]"
+  --failed-only)
+    failed_only=true
     shift # past argument=value
+  ;;
+  -h|--help)
+    echo "usage: ./rescan_single_process.sh --process=[4f_WW_sl/4f_sW_sl/...] --input-config=[...] --output-config=[...] --tgc-config=[...] --tgc-points-file=[...] [--failed-only]"
+    echo "The optional --failed-only argument allows rerunning only previously failed rescans."
+    exit
   ;;
   *)
     # unknown option
@@ -88,8 +94,12 @@ for e_pol in "${e_polarizations[@]}"; do
     # Array to collect condor job IDs so that I can keep track of if any are still running
     condor_job_IDs=()
     
-    # Get all steering files for process, then loop to create job for each file
-    rescan_topdir=$( ${dir}/manage_rescan_files.sh --set-rescanfiles --process=${process} --e-Pol=${e_pol} --e+Pol=${p_pol} --input-config=${input_config} --output-config=${output_config} --tgc-config=${tgc_config} --tgc-points-file=${tgc_points_file})
+    # Get all steering files for process
+    setup_command="--set-rescanfiles"
+    if [ "$failed_only" = true ]; then
+      setup_command="--print-topdir"
+    fi
+    rescan_topdir=$( ${dir}/manage_rescan_files.sh ${setup_command} --process=${process} --e-Pol=${e_pol} --e+Pol=${p_pol} --input-config=${input_config} --output-config=${output_config} --tgc-config=${tgc_config} --tgc-points-file=${tgc_points_file})
     
     if [[ $rescan_topdir == "" ]]; then
       echo "No files found for process ${process} ${e_pol} ${p_pol}."
@@ -107,7 +117,16 @@ for e_pol in "${e_polarizations[@]}"; do
       mkdir -p ${condor_output_subdir}
     fi
     
+    # Loop over each subdir and rescan the corresponding event file
     for rescan_subdir in ${rescan_topdir}/*/; do
+      if [ "$failed_only" = true ]; then
+        # Requested that only previously failed rescans are rerun
+        # -> Check if the directory contains a weight file, skip if it does
+        if ls ${rescan_subdir}/*.weights.dat 1> /dev/null 2>&1; then
+          continue
+        fi
+      fi 
+      
       # The command to be executed: 
       # Load the needed software and start the rescan
       command_string="cd ${dir}/.. \&\& . load_env.sh \&\& cd ${rescan_subdir} \&\& whizard ${process}_rescan.sin \&\& cd ${dir}"
