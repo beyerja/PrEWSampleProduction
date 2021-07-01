@@ -17,6 +17,6 @@ log                 = $(log_dir)/$(Cluster).$(Process).log
 Requirements = ( OpSysAndVer == "CentOS7" ) 
 
 # Request 6 hour of runtime
-+RequestRuntime = 21600
++RequestRuntime = 28800
 
 queue

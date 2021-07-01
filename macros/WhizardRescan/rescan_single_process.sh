@@ -71,7 +71,7 @@ dir="$( cd "$( dirname "${BASH_SOURCE[0]}"  )" && pwd  )" # path of this macro
 
 # Standard HTCondor environment
 condor_directory=${dir}/../SubmitScripts
-submit_script=${condor_directory}/submit_script_6h.submit
+submit_script=${condor_directory}/submit_script_8h.submit
 
 # Condor logging output 
 . ${output_config}
