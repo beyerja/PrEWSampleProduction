@@ -161,7 +161,7 @@ for e_pol in "${e_polarizations[@]}"; do
     echo "Jobs of ${process} ${e_pol} ${p_pol} finished!"
     
     echo "Clean up whizard files that aren't needed."
-    ${dir}/manage_process_files.sh --clean-up --process=${process} --e-Pol=${e_pol} --e+Pol=${p_pol} --input-config=${input_config} --output-config=${output_config}
+    ${dir}/manage_rescan_files.sh --clean-up --process=${process} --e-Pol=${e_pol} --e+Pol=${p_pol} --input-config=${input_config} --output-config=${output_config}
     
     echo "Done with ${process} ${e_pol} ${p_pol}!"
     } &
