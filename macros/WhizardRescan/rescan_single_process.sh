@@ -97,6 +97,7 @@ for e_pol in "${e_polarizations[@]}"; do
     # Get all steering files for process
     setup_command="--set-rescanfiles"
     if [ "$failed_only" = true ]; then
+      # No need to set up scripts again if only failed rescans are to be re-run
       setup_command="--print-topdir"
     fi
     rescan_topdir=$( ${dir}/manage_rescan_files.sh ${setup_command} --process=${process} --e-Pol=${e_pol} --e+Pol=${p_pol} --input-config=${input_config} --output-config=${output_config} --tgc-config=${tgc_config} --tgc-points-file=${tgc_points_file})
