@@ -151,7 +151,9 @@ if [[ ${action} == "set" ]] || [[ ${action} == "print" ]]; then
   echo ${rescan_topdir}
   
 elif [[ ${action} == "clean" ]]; then
-  rm -f ${rescan_topdir}/*/{default_*,*.mod,*.f90,*.lo,*.o,*.la,*.makefile,*.phs} 
+  for subdir in ${rescan_topdir}/*/; do
+    rm -f ${subdir}/{default_*,*.mod,*.f90,*.lo,*.o,*.la,*.makefile,*.phs} 
+  done
 else   
   >&2 echo "In manage_rescan_files.sh: Unknown action '"${action}"' requested."
   >&2 echo "Exiting."
