@@ -39,6 +39,9 @@ WWProcessor::WWProcessor() : marlin::Processor("WWProcessor") {
                              m_file_path, std::string("./output.root"));
   registerProcessorParameter("OutputTreeName", "Name of the output TTree",
                              m_tree_name, std::string("WWObservables"));
+
+  registerProcessorParameter("WeightFilePath", "Path to rescan weight file",
+                             m_weights_path, std::string(""));
 }
 
 //------------------------------------------------------------------------------
@@ -66,6 +69,13 @@ void WWProcessor::processEvent(EVENT::LCEvent *event) {
   streamlog_out(DEBUG) << "Processing event no " << event->getEventNumber()
                        << " - run " << event->getEventNumber() << std::endl;
 
+  // If weights were requested and not found for this event, skip the event.
+  // Main reason this happens is a bug that causes the rescan to fail.
+  if ((!m_weights_path.empty()) && (m_wfr.n_events() <= n_evt)) {
+    n_evt++;
+    return;
+  }
+
   // Read the header info
   m_header.read(*event);
 
@@ -77,10 +87,29 @@ void WWProcessor::processEvent(EVENT::LCEvent *event) {
       Utils::Collections::read<EVENT::MCParticle>(event, m_mcCollectionName);
   this->extract_observables(mcps);
 
+  // Read the current weights if requested
+  if (!m_weights_path.empty()) {
+    // Way of copying must preserve the addresses of m_evt_weights
+    for (size_t p = 0; p < m_wfr[n_evt].size(); p++) {
+      m_evt_weights[p] = m_wfr[n_evt][p];
+    }
+  }
+
   // Fill the event data into the tree
   m_tree->Fill();
+
+  // Count up the event number
+  n_evt++;
 }
 
 //------------------------------------------------------------------------------
 
-void WWProcessor::end() { this->save_tree(); }
+void WWProcessor::end() {
+  this->save_tree();
+  if ((!m_weights_path.empty()) && (m_wfr.n_events() != n_evt)) {
+    streamlog_out(WARNING) << "Weights were requested and only the first "
+                           << m_wfr.n_events() << " out of " << n_evt
+                           << " events had weights assigned "
+                           << "- remaining events were not computed.\n";
+  }
+}
