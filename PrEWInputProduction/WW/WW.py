@@ -32,6 +32,12 @@ def main():
     input_RL = IH.InputInfo(path_RL, tree_name, energy)
     inputs = [input_LR, input_RL]
 
+    # Triple Gauge Coupling configurations
+    TGC_config_path = "/afs/desy.de/group/flc/pool/beyerjac/TGCAnalysis/SampleProduction/MCProduction/PrEWSampleProduction/scripts/config/tgc.config"
+    TGC_points_path = "/afs/desy.de/group/flc/pool/beyerjac/TGCAnalysis/SampleProduction/MCProduction/PrEWSampleProduction/scripts/config/tgc_dev_points_g1z_ka_la.config"
+    TGC_weight_base = "rescan_weights.weight"
+    phys_options = PPO.PhysicsOptions(use_TGCs=True, TGC_config_path=TGC_config_path, TGC_points_path=TGC_points_path, TGC_weight_base=TGC_weight_base) )
+
     # Output settings
     output_dir = "/nfs/dust/ilc/group/ild/beyerjac/TGCAnalysis/SampleProduction/NewMCProduction/4f_WW_sl/PrEWInput"
     create_plots = True
@@ -46,23 +52,27 @@ def main():
     # Create all WW distributions
     for input in inputs:
       CPI.create_PrEW_input(
-        input = input, coords = coords, 
-        output = OH.OutputInfo( output_dir, distr_name = "WW_muminus", create_plots = create_plots), 
+        input = input, coords = coords,
+        output = OH.OutputInfo( output_dir, distr_name = "WW_muminus", create_plots = create_plots),
         cuts = "(decay_to_mu == 1) && (l_charge == -1)",
-        syst = SSO.SystematicsOptions(use_muon_acc=True,costh_branch="costh_l"))
+        syst = SSO.SystematicsOptions(use_muon_acc=True,costh_branch="costh_l"),
+        phys = phys_options)
       CPI.create_PrEW_input(
-        input = input, coords = coords, 
-        output = OH.OutputInfo( output_dir, distr_name = "WW_muplus", create_plots = create_plots), 
+        input = input, coords = coords,
+        output = OH.OutputInfo( output_dir, distr_name = "WW_muplus", create_plots = create_plots),
         cuts = "(decay_to_mu == 1) && (l_charge == +1)",
-        syst = SSO.SystematicsOptions(use_muon_acc=True,costh_branch="costh_l"))
+        syst = SSO.SystematicsOptions(use_muon_acc=True,costh_branch="costh_l"),
+        phys = phys_options)
       CPI.create_PrEW_input(
-        input = input, coords = coords, 
-        output = OH.OutputInfo( output_dir, distr_name = "WW_tauminus", create_plots = create_plots), 
-        cuts = "(decay_to_tau == 1) && (l_charge == -1)")
+        input = input, coords = coords,
+        output = OH.OutputInfo( output_dir, distr_name = "WW_tauminus", create_plots = create_plots),
+        cuts = "(decay_to_tau == 1) && (l_charge == -1)",
+        phys = phys_options)
       CPI.create_PrEW_input(
-        input = input, coords = coords, 
-        output = OH.OutputInfo( output_dir, distr_name = "WW_tauplus", create_plots = create_plots), 
-        cuts = "(decay_to_tau == 1) && (l_charge == +1)")
+        input = input, coords = coords,
+        output = OH.OutputInfo( output_dir, distr_name = "WW_tauplus", create_plots = create_plots),
+        cuts = "(decay_to_tau == 1) && (l_charge == +1)",
+        phys = phys_options)
 
     print("Done.")
 
@@ -71,4 +81,3 @@ def main():
 # If this script is called directly (not imported), call the main funciton
 if __name__ == "__main__":
     main()
-    
