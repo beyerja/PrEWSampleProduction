@@ -4,6 +4,9 @@
 #include <Utils/HeaderInfo.h>
 #include <WW/WWObservables.h>
 
+// includes from MarlinHelp
+#include <MarlinHelp/Whizard/WeightFileReader.h>
+
 // Includes from iLCSoft
 #include "EVENT/MCParticle.h"
 #include "marlin/Processor.h"
@@ -80,7 +83,11 @@ private:
   std::string m_file_path{""};
   std::string m_tree_name{""};
 
+  std::string m_weights_path{""};
+  
   // ---------------------------------------------------------------------------
+  // Internal event number counter
+  int n_evt {0};
 
   // TFile and TTree with result output
   std::unique_ptr<TFile> m_file{};
@@ -89,6 +96,10 @@ private:
   // Output information
   Utils::HeaderInfo m_header{};
   WW::WWObservables m_observables{};
+  std::vector<double> m_evt_weights {};
+  
+  // Reader for whizard rescan weights
+  MarlinHelp::Whizard::WeightFileReader m_wfr {};
 
   // Internal functions
   void create_tree();

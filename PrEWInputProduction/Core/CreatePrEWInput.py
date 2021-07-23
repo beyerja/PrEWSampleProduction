@@ -14,6 +14,9 @@ import sys
 import Conventions as Conv
 sys.path.append("../IO")
 import CSVMetadata as CSVM
+sys.path.append("../Physics")
+import PhysicsOptions as PPO
+import TGCs as PT
 sys.path.append("../ROOTHelp")
 import DistrHelpers as DH
 import DistrPlotting as DP
@@ -26,7 +29,7 @@ import MuonAccValidation as MAV
 # ------------------------------------------------------------------------------
 
 def create_PrEW_input(input, output, coords, cuts, 
-                      syst=SSO.SystematicsOptions()):
+                      syst=SSO.SystematicsOptions(), phys=PPO.PhysicsOptions()):
   """ Create the input CSV distributions for PrEW by setting up an RDataFrame
       and extraction all relevant observables and coefficients and performing 
       the requested cuts.
@@ -62,6 +65,13 @@ def create_PrEW_input(input, output, coords, cuts,
                                           syst.costh_branch, output.distr_name, coords)
     muon_acc_validator = MAV.MuonAccValidator(rdf_after_cuts, muon_acc_cut, delta, 
                                               syst.costh_branch, output.distr_name, coords)
+                                              
+  # Prepare TGCs if requested
+  tgc_par = None
+  if phys.use_TGCs:
+    tgc_par = PT.TGCParametrisation(rdf_after_cuts, coords, 
+                                    phys.TGC_config_path, phys.TGC_points_path, 
+                                    output.distr_name, phys.TGC_weight_base)
 
   # ----------------------- Trigger RDF operations -----------------------------
   log.debug("Triggering RDataFrame operations.")
@@ -101,6 +111,10 @@ def create_PrEW_input(input, output, coords, cuts,
   # Try extracting the differential coefficients for the muon acceptance box.
   if muon_acc is not None:
     data = muon_acc.add_coefs_to_data(data)
+    
+  # Try extracting the differential TGC coefficients
+  if tgc_par:
+    data = tgc_par.add_coefs_to_data(data)
 
   # Create a pandas dataframe
   df = pd.DataFrame(data)

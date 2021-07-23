@@ -147,41 +147,51 @@ def get_data(root_hist, coords):
 
 # ------------------------------------------------------------------------------
 
-def get_hist_ptr_1d(rdf, distr_name, coords):
+def get_hist_ptr_1d(rdf, distr_name, coords, w_branch=None):
     """ Get TH1D histogram pointer. """
-    th1_setup = ROOT.TH1D(distr_name, distr_name,
-                          coords[0].n_bins, coords[0].min, coords[0].max)
-    return rdf.Histo1D(ROOT.RDF.TH1DModel(th1_setup), coords[0].name)
+    th1_setup = (distr_name, distr_name,
+                 coords[0].n_bins, coords[0].min, coords[0].max)
+    if w_branch:
+      return rdf.Histo1D(th1_setup, coords[0].name, w_branch)
+    else:
+      return rdf.Histo1D(th1_setup, coords[0].name)
     
-def get_hist_ptr_2d(rdf, distr_name, coords):
+def get_hist_ptr_2d(rdf, distr_name, coords, w_branch=None):
     """ Get TH2D histogram pointer. """
-    th2_setup = ROOT.TH2D(distr_name, distr_name,
-                          coords[0].n_bins, coords[0].min, coords[0].max,
-                          coords[1].n_bins, coords[1].min, coords[1].max)
-    return rdf.Histo2D(ROOT.RDF.TH2DModel(th2_setup),
-                       coords[0].name, coords[1].name)
+    th2_setup = (distr_name, distr_name,
+                 coords[0].n_bins, coords[0].min, coords[0].max,
+                 coords[1].n_bins, coords[1].min, coords[1].max)
+    if w_branch:
+      return rdf.Histo2D(th2_setup, coords[0].name, coords[1].name, w_branch)
+    else:
+      return rdf.Histo2D(th2_setup, coords[0].name, coords[1].name)
   
-def get_hist_ptr_3d(rdf, distr_name, coords):
+def get_hist_ptr_3d(rdf, distr_name, coords, w_branch=None):
     """ Get TH3D histogram pointer. """
-    th3_setup = ROOT.TH3D(distr_name, distr_name,
-                          coords[0].n_bins, coords[0].min, coords[0].max,
-                          coords[1].n_bins, coords[1].min, coords[1].max,
-                          coords[2].n_bins, coords[2].min, coords[2].max)
-    return rdf.Histo3D(ROOT.RDF.TH3DModel(th3_setup),
-                       coords[0].name, coords[1].name, coords[2].name)
+    th3_setup = (distr_name, distr_name,
+                 coords[0].n_bins, coords[0].min, coords[0].max,
+                 coords[1].n_bins, coords[1].min, coords[1].max,
+                 coords[2].n_bins, coords[2].min, coords[2].max)
+    if w_branch:
+      return rdf.Histo3D(th3_setup, coords[0].name, coords[1].name, 
+                                    coords[2].name, w_branch)
+    else:
+      return rdf.Histo3D(th3_setup, coords[0].name, coords[1].name, 
+                                    coords[2].name)
 
-def get_hist_ptr(rdf, distr_name, coords):
+def get_hist_ptr(rdf, distr_name, coords, w_branch=None):
     """ Get a histogram pointer from the RDataFrame according to the coordinates 
         given.
+        w_branch ... optional weight branch
     """
     hist_ptr = None 
     dim = len(coords)
     if (dim == 1):
-      hist_ptr = get_hist_ptr_1d(rdf, distr_name, coords)
+      hist_ptr = get_hist_ptr_1d(rdf, distr_name, coords, w_branch)
     elif (dim == 2):
-      hist_ptr = get_hist_ptr_2d(rdf, distr_name, coords)
+      hist_ptr = get_hist_ptr_2d(rdf, distr_name, coords, w_branch)
     elif (dim == 3):
-      hist_ptr = get_hist_ptr_3d(rdf, distr_name, coords)
+      hist_ptr = get_hist_ptr_3d(rdf, distr_name, coords, w_branch)
     else:
         raise ValueError("Invalid hist dimension: {}".format(dim))
     return hist_ptr
