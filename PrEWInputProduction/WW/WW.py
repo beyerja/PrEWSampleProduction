@@ -36,7 +36,7 @@ def main():
     TGC_config_path = "/afs/desy.de/group/flc/pool/beyerjac/TGCAnalysis/SampleProduction/MCProduction/PrEWSampleProduction/scripts/config/tgc.config"
     TGC_points_path = "/afs/desy.de/group/flc/pool/beyerjac/TGCAnalysis/SampleProduction/MCProduction/PrEWSampleProduction/scripts/config/tgc_dev_points_g1z_ka_la.config"
     TGC_weight_base = "rescan_weights.weight"
-    phys_options = PPO.PhysicsOptions(use_TGCs=True, TGC_config_path=TGC_config_path, TGC_points_path=TGC_points_path, TGC_weight_base=TGC_weight_base) )
+    phys_options = PPO.PhysicsOptions(use_TGCs=True, TGC_config_path=TGC_config_path, TGC_points_path=TGC_points_path, TGC_weight_base=TGC_weight_base)
 
     # Output settings
     output_dir = "/nfs/dust/ilc/group/ild/beyerjac/TGCAnalysis/SampleProduction/NewMCProduction/4f_WW_sl/PrEWInput"
