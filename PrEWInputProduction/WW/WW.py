@@ -9,6 +9,8 @@ import CreatePrEWInput as CPI
 sys.path.append("../IO")
 import InputHelpers as IH
 import OutputHelpers as OH
+sys.path.append("../Physics")
+import PhysicsOptions as PPO
 sys.path.append("../ROOTHelp")
 import DistrHelpers as DH
 sys.path.append("../Systematics")
